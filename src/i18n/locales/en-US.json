@@ -1,0 +1,193 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "search": "Search",
+    "upload": "Upload",
+    "export": "Export",
+    "import": "Import",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Remove",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "name": "Name",
+    "status": "Status",
+    "download": "Download",
+    "copy": "Copy",
+    "regenerate": "Regenerate",
+    "default": "Default",
+    "total": "total",
+    "updated": "Updated"
+  },
+  "auth": {
+    "welcome": "Welcome to {{appName}}",
+    "tagline": "AI-powered document Q&A with RAG",
+    "localStorageNote": "Your data is stored locally in your browser",
+    "errors": {
+      "operationNotAllowed": "This operation is not allowed",
+      "userDisabled": "This account has been disabled",
+      "popupClosed": "Sign-in popup was closed",
+      "networkError": "Network error, please check your connection",
+      "tooManyRequests": "Too many attempts, please try again later",
+      "requiresRecentLogin": "Please sign in again to continue",
+      "unknown": "An unknown error occurred"
+    },
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "general": "General",
+      "appearance": "Appearance",
+      "profile": "Profile"
+    },
+    "general": {
+      "languageRegion": "Language & Region",
+      "language": "Language",
+      "profileSettings": "Profile Settings",
+      "profileSettingsDesc": "Update your profile settings in the Profile tab.",
+      "dataManagement": "Data Management",
+      "exportData": "Export Data",
+      "exportDataDesc": "Download all your data as a JSON file",
+      "importData": "Import Data",
+      "importDataDesc": "Restore data from a backup file",
+      "exportSuccess": "Data exported successfully",
+      "importSuccess": "Data imported successfully. Please refresh the page.",
+      "exportError": "Failed to export data",
+      "importError": "Failed to import data",
+      "invalidFormat": "Invalid file format"
+    },
+    "appearance": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "preview": "Preview",
+      "previewText": "This is a preview of how text will appear with your current settings.",
+      "previewSmallText": "Smaller text like descriptions will scale proportionally.",
+      "currentThemeAuto": "Currently using {{theme}} theme based on your system preference",
+      "currentTheme": "Using {{theme}} theme"
+    },
+    "profile": {
+      "profileInfo": "Profile Information",
+      "displayName": "Display Name",
+      "email": "Email",
+      "saveChanges": "Save Changes",
+      "account": "Account",
+      "accountId": "Account ID",
+      "memberSince": "Member since",
+      "unknown": "Unknown",
+      "dangerZone": "Danger Zone",
+      "logOut": "Log out",
+      "logOutDesc": "Sign out of your account on this device",
+      "logOutConfirm": {
+        "title": "Log Out",
+        "message": "Are you sure you want to log out? You will need to sign in again to access your account."
+      }
+    }
+  },
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "userMenu": {
+    "settings": "Settings",
+    "exportData": "Export Data",
+    "importData": "Import Data",
+    "logOut": "Log Out"
+  },
+  "commandPalette": {
+    "placeholder": "Search commands...",
+    "actions": "Actions",
+    "navigation": "Navigation",
+    "goToAnalyze": "Go to Home",
+    "goToSettings": "Go to Settings",
+    "noResults": "No results found"
+  },
+  "nav": {
+    "analyze": "Home",
+    "settings": "Settings"
+  },
+  "screenshot": {
+    "title": "Image Analysis",
+    "subtitle": "AI-powered image analysis",
+    "heroBadge": "No login required to explore",
+    "heroTitle": "Explore images before you sign in",
+    "heroSubtitle": "Drop a screenshot, pick a mode, and sign in only when you are ready to run analysis.",
+    "signInCta": "Sign in",
+    "signInHint": "You'll return here after signing in.",
+    "loginRequired": "Sign in required to run analysis",
+    "signInToAnalyze": "Sign in to analyze",
+    "steps": {
+      "upload": {
+        "title": "Drop an image",
+        "description": "Paste, drag, or choose a file to preview."
+      },
+      "choose": {
+        "title": "Pick a mode",
+        "description": "Choose explain, OCR, translate, or cleanup."
+      },
+      "analyze": {
+        "title": "Run analysis",
+        "description": "Sign in only when you are ready to analyze."
+      }
+    },
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "clear": "Clear",
+    "result": "Analysis Result",
+    "reanalyze": "Reanalyze",
+    "analysisMode": "Analysis Mode",
+    "dropzone": {
+      "title": "Drop image here",
+      "subtitle": "or click the buttons below"
+    },
+    "pasteFromClipboard": "Paste Image",
+    "selectFile": "Select File",
+    "shortcut": "Tip: Press Ctrl+V to paste",
+    "modes": {
+      "explain": "Explain",
+      "explainDesc": "General explanation of the image content",
+      "ocr": "OCR",
+      "ocrDesc": "Extract text from the image",
+      "translate": "Translate",
+      "translateDesc": "Translate text in the image",
+      "removeBg": "Remove Background",
+      "removeBgDesc": "Remove image background",
+      "segmentPerson": "Person Cutout",
+      "segmentPersonDesc": "Segment person from the image"
+    },
+    "errors": {
+      "invalidFileType": "Please select an image file",
+      "readError": "Failed to read file",
+      "clipboardError": "Failed to read from clipboard",
+      "noImageInClipboard": "No image found in clipboard"
+    },
+    "prompts": {
+      "instruction": "Please answer in English.",
+      "explain": "Please explain the content of this screenshot in detail, including:\n- What this image shows\n- The main elements and their functions\n- Any important details or information\n- If it's a UI interface, describe its purpose and interactions\n\n{{instruction}}",
+      "ocr": "Please extract all visible text from this image, following these requirements:\n- Maintain the original format and structure\n- If there are multiple columns or sections, list them separately\n- Mark any unrecognizable text\n- If it's a table, try to maintain the table format\n\n{{instruction}} (but keep original text untranslated).",
+      "translate": "Please translate all text in this image:\n- Translate all non-English text into English\n- Maintain the original format and structure\n- If there are technical terms, provide original and translation\n- For difficult-to-translate words, provide explanations\n\n{{instruction}}",
+      "remove-bg": "Please identify the main object or subject in this image and return its boundary coordinates in JSON format.\n\nReturn JSON in this format:\n```json\n{\n  \"subject\": \"Description of the main subject\",\n  \"bounds\": {\n    \"x\": starting X coordinate percentage (0-100),\n    \"y\": starting Y coordinate percentage (0-100),\n    \"width\": width percentage (0-100),\n    \"height\": height percentage (0-100)\n  },\n  \"polygon\": [\n    {\"x\": X percentage, \"y\": Y percentage},\n    ...\n  ]\n}\n```\n\nReturn only JSON, no other explanation.",
+      "segment-person": "Please identify all people in this image and return the contour coordinates for each person in JSON format.\n\nReturn JSON in this format:\n```json\n{\n  \"people\": [\n    {\n      \"id\": 1,\n      \"bounds\": {\n        \"x\": starting X coordinate percentage (0-100),\n        \"y\": starting Y coordinate percentage (0-100),\n        \"width\": width percentage (0-100),\n        \"height\": height percentage (0-100)\n      },\n      \"polygon\": [\n        {\"x\": X percentage, \"y\": Y percentage},\n        ...\n      ]\n    }\n  ],\n  \"count\": number of people\n}\n```\n\nIf no people in the image, return: {\"people\": [], \"count\": 0}\n\nReturn only JSON, no other explanation."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "tryAgain": "Try again",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
+  }
+}

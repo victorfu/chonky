@@ -1,0 +1,9 @@
+# No Specs Required
+
+This change removes functionality without adding or modifying any specifications.
+
+See proposal.md for details:
+- Removing email/password authentication
+- Simplifying to Google-only login
+- No new capabilities introduced
+- No existing spec requirements modified

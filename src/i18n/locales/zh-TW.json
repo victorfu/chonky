@@ -1,0 +1,193 @@
+{
+  "common": {
+    "save": "儲存",
+    "cancel": "取消",
+    "delete": "刪除",
+    "edit": "編輯",
+    "done": "完成",
+    "close": "關閉",
+    "confirm": "確認",
+    "loading": "載入中...",
+    "search": "搜尋",
+    "upload": "上傳",
+    "export": "匯出",
+    "import": "匯入",
+    "create": "建立",
+    "add": "新增",
+    "remove": "移除",
+    "back": "返回",
+    "next": "下一步",
+    "yes": "是",
+    "no": "否",
+    "or": "或",
+    "and": "和",
+    "name": "名稱",
+    "status": "狀態",
+    "download": "下載",
+    "copy": "複製",
+    "regenerate": "重新生成",
+    "default": "預設",
+    "total": "總計",
+    "updated": "更新於"
+  },
+  "auth": {
+    "welcome": "歡迎使用 {{appName}}",
+    "tagline": "AI 智慧文件問答系統",
+    "localStorageNote": "您的資料儲存在本機瀏覽器中",
+    "errors": {
+      "operationNotAllowed": "此操作不被允許",
+      "userDisabled": "此帳號已被停用",
+      "popupClosed": "登入視窗已關閉",
+      "networkError": "網路連線錯誤，請檢查您的網路",
+      "tooManyRequests": "嘗試次數過多，請稍後再試",
+      "requiresRecentLogin": "請重新登入後再試",
+      "unknown": "發生未知錯誤"
+    },
+    "signInWithGoogle": "使用 Google 登入"
+  },
+  "settings": {
+    "title": "設定",
+    "tabs": {
+      "general": "一般",
+      "appearance": "外觀",
+      "profile": "個人檔案"
+    },
+    "general": {
+      "languageRegion": "語言與地區",
+      "language": "語言",
+      "profileSettings": "個人檔案設定",
+      "profileSettingsDesc": "在「個人檔案」分頁中更新您的個人資料。",
+      "dataManagement": "資料管理",
+      "exportData": "匯出資料",
+      "exportDataDesc": "將所有資料下載為 JSON 檔案",
+      "importData": "匯入資料",
+      "importDataDesc": "從備份檔案還原資料",
+      "exportSuccess": "資料匯出成功",
+      "importSuccess": "資料匯入成功，請重新整理頁面。",
+      "exportError": "資料匯出失敗",
+      "importError": "資料匯入失敗",
+      "invalidFormat": "檔案格式無效"
+    },
+    "appearance": {
+      "theme": "主題",
+      "light": "淺色",
+      "dark": "深色",
+      "system": "系統",
+      "preview": "預覽",
+      "previewText": "這是文字在目前設定下的顯示預覽。",
+      "previewSmallText": "較小的文字（如說明文字）會按比例縮放。",
+      "currentThemeAuto": "目前根據系統偏好使用 {{theme}} 主題",
+      "currentTheme": "使用 {{theme}} 主題"
+    },
+    "profile": {
+      "profileInfo": "個人資訊",
+      "displayName": "顯示名稱",
+      "email": "電子郵件",
+      "saveChanges": "儲存變更",
+      "account": "帳號",
+      "accountId": "帳號 ID",
+      "memberSince": "註冊日期",
+      "unknown": "未知",
+      "dangerZone": "危險區域",
+      "logOut": "登出",
+      "logOutDesc": "從此裝置登出您的帳號",
+      "logOutConfirm": {
+        "title": "登出",
+        "message": "確定要登出嗎？您需要重新登入才能存取您的帳號。"
+      }
+    }
+  },
+  "sidebar": {
+    "collapse": "收合側邊欄",
+    "expand": "展開側邊欄"
+  },
+  "userMenu": {
+    "settings": "設定",
+    "exportData": "匯出資料",
+    "importData": "匯入資料",
+    "logOut": "登出"
+  },
+  "commandPalette": {
+    "placeholder": "搜尋指令...",
+    "actions": "動作",
+    "navigation": "導覽",
+    "goToAnalyze": "前往首頁",
+    "goToSettings": "前往設定",
+    "noResults": "找不到結果"
+  },
+  "nav": {
+    "analyze": "首頁",
+    "settings": "設定"
+  },
+  "screenshot": {
+    "title": "圖片分析",
+    "subtitle": "AI 智慧圖片解析",
+    "heroBadge": "免登入即可瀏覽",
+    "heroTitle": "登入前先探索圖片",
+    "heroSubtitle": "上傳截圖、選擇模式，準備開始分析時再登入。",
+    "signInCta": "登入",
+    "signInHint": "登入後會回到此頁。",
+    "loginRequired": "進行分析需先登入",
+    "signInToAnalyze": "登入以分析",
+    "steps": {
+      "upload": {
+        "title": "放入圖片",
+        "description": "貼上、拖曳或選擇檔案預覽。"
+      },
+      "choose": {
+        "title": "選擇模式",
+        "description": "可選解釋、文字辨識、翻譯或去背。"
+      },
+      "analyze": {
+        "title": "開始分析",
+        "description": "準備好再登入進行分析。"
+      }
+    },
+    "analyze": "開始分析",
+    "analyzing": "分析中...",
+    "clear": "清除",
+    "result": "分析結果",
+    "reanalyze": "重新分析",
+    "analysisMode": "分析模式",
+    "dropzone": {
+      "title": "拖放圖片至此",
+      "subtitle": "或點擊下方按鈕上傳"
+    },
+    "pasteFromClipboard": "貼上圖片",
+    "selectFile": "選擇檔案",
+    "shortcut": "提示：可直接 Ctrl+V 貼上",
+    "modes": {
+      "explain": "解釋",
+      "explainDesc": "通用圖片內容解釋",
+      "ocr": "文字辨識",
+      "ocrDesc": "從圖片中提取文字",
+      "translate": "翻譯",
+      "translateDesc": "翻譯圖片中的文字",
+      "removeBg": "去背景",
+      "removeBgDesc": "移除圖片背景",
+      "segmentPerson": "人物切割",
+      "segmentPersonDesc": "切割圖片中的人物"
+    },
+    "errors": {
+      "invalidFileType": "請選擇圖片檔案",
+      "readError": "讀取檔案失敗",
+      "clipboardError": "無法讀取剪貼簿",
+      "noImageInClipboard": "剪貼簿中找不到圖片"
+    },
+    "prompts": {
+      "instruction": "請用繁體中文回答。",
+      "explain": "請詳細解釋這張截圖的內容，包括：\n- 這張圖片顯示的是什麼\n- 圖片中的主要元素和它們的功能\n- 任何重要的細節或訊息\n- 如果是 UI 介面，描述其用途和互動方式\n\n{{instruction}}",
+      "ocr": "請提取這張圖片中所有可見的文字，按照以下要求：\n- 保持原有的格式和結構\n- 如果有多欄或多區塊，分別列出\n- 標記任何無法辨識的文字\n- 如果是表格，盡量保持表格格式\n\n{{instruction}}（但保留原文文字不翻譯）。",
+      "translate": "請翻譯這張圖片中的所有文字：\n- 將所有非繁體中文的文字翻譯成繁體中文\n- 保持原有的格式和結構\n- 如果有專業術語，提供原文和翻譯\n- 對於難以翻譯的詞彙，提供解釋\n\n{{instruction}}",
+      "remove-bg": "請識別這張圖片中的主要物體或主體，並以 JSON 格式回傳其邊界座標。\n\n請回傳以下格式的 JSON：\n```json\n{\n  \"subject\": \"主體名稱描述\",\n  \"bounds\": {\n    \"x\": 起始X座標百分比(0-100),\n    \"y\": 起始Y座標百分比(0-100),\n    \"width\": 寬度百分比(0-100),\n    \"height\": 高度百分比(0-100)\n  },\n  \"polygon\": [\n    {\"x\": X座標百分比, \"y\": Y座標百分比},\n    ...\n  ]\n}\n```\n\n只回傳 JSON，不要其他說明。",
+      "segment-person": "請識別這張圖片中的所有人物，並以 JSON 格式回傳每個人物的輪廓座標。\n\n請回傳以下格式的 JSON：\n```json\n{\n  \"people\": [\n    {\n      \"id\": 1,\n      \"bounds\": {\n        \"x\": 起始X座標百分比(0-100),\n        \"y\": 起始Y座標百分比(0-100),\n        \"width\": 寬度百分比(0-100),\n        \"height\": 高度百分比(0-100)\n      },\n      \"polygon\": [\n        {\"x\": X座標百分比, \"y\": Y座標百分比},\n        ...\n      ]\n    }\n  ],\n  \"count\": 人數\n}\n```\n\n如果圖片中沒有人物，回傳：{\"people\": [], \"count\": 0}\n\n只回傳 JSON，不要其他說明。"
+    }
+  },
+  "errors": {
+    "generic": "發生錯誤",
+    "tryAgain": "重試",
+    "notFound": "找不到",
+    "unauthorized": "未授權",
+    "forbidden": "禁止存取"
+  }
+}
