@@ -11,8 +11,6 @@ interface FloatingCommandBarProps {
   selectedMode: AnalysisMode;
   selectedModel: ModelType;
   isAnalyzing: boolean;
-  isAuthenticated?: boolean;
-  onSignIn?: () => void;
   onModeChange: (mode: AnalysisMode) => void;
   onModelChange: (model: ModelType) => void;
   onAnalyze: () => void;
@@ -45,15 +43,12 @@ export function FloatingCommandBar({
   selectedMode,
   selectedModel,
   isAnalyzing,
-  isAuthenticated = true,
-  onSignIn,
   onModeChange,
   onModelChange,
   onAnalyze,
   onClear,
 }: FloatingCommandBarProps) {
   const { t } = useTranslation();
-  const showAuthHint = !isAuthenticated;
 
   return (
     <div
@@ -132,23 +127,10 @@ export function FloatingCommandBar({
           >
             {isAnalyzing
               ? t('screenshot.analyzing', 'Analyzing...')
-              : showAuthHint
-                ? t('screenshot.signInToAnalyze', 'Sign in to analyze')
-                : t('screenshot.analyze', 'Analyze')}
+              : t('screenshot.analyze', 'Analyze')}
           </Button>
         </div>
       </div>
-
-      {showAuthHint && (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-base-content/60">
-          <span>{t('screenshot.loginRequired', 'Sign in required to run analysis')}</span>
-          {onSignIn && (
-            <Button variant="ghost" size="sm" onClick={onSignIn}>
-              {t('screenshot.signInCta', 'Sign in')}
-            </Button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

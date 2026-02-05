@@ -66,8 +66,8 @@ export function UserMenu() {
   };
 
   const handleLogout = () => {
+    navigate('/', { replace: true });
     logout();
-    navigate('/login');
   };
 
   const toggleTheme = () => {

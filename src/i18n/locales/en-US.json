@@ -122,13 +122,12 @@
   "screenshot": {
     "title": "Image Analysis",
     "subtitle": "AI-powered image analysis",
-    "heroBadge": "No login required to explore",
-    "heroTitle": "Explore images before you sign in",
-    "heroSubtitle": "Drop a screenshot, pick a mode, and sign in only when you are ready to run analysis.",
+    "heroTitle": "Explore your screenshots",
+    "heroSubtitle": "Upload a screenshot, pick a mode, continue when you're ready to analyze.",
     "signInCta": "Sign in",
-    "signInHint": "You'll return here after signing in.",
-    "loginRequired": "Sign in required to run analysis",
-    "signInToAnalyze": "Sign in to analyze",
+    "signInHint": "You'll return here after verification.",
+    "loginRequired": "Verification required to run analysis.",
+    "signInToAnalyze": "Analyze",
     "steps": {
       "upload": {
         "title": "Drop an image",
@@ -140,7 +139,7 @@
       },
       "analyze": {
         "title": "Run analysis",
-        "description": "Sign in only when you are ready to analyze."
+        "description": "When you're ready, start the analysis."
       }
     },
     "analyze": "Analyze",

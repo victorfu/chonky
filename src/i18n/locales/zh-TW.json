@@ -122,13 +122,12 @@
   "screenshot": {
     "title": "圖片分析",
     "subtitle": "AI 智慧圖片解析",
-    "heroBadge": "免登入即可瀏覽",
-    "heroTitle": "登入前先探索圖片",
-    "heroSubtitle": "上傳截圖、選擇模式，準備開始分析時再登入。",
+    "heroTitle": "探索你的截圖",
+    "heroSubtitle": "上傳截圖、選模式，準備分析再繼續",
     "signInCta": "登入",
-    "signInHint": "登入後會回到此頁。",
-    "loginRequired": "進行分析需先登入",
-    "signInToAnalyze": "登入以分析",
+    "signInHint": "完成驗證後會回到此頁",
+    "loginRequired": "分析前會進行驗證",
+    "signInToAnalyze": "開始分析",
     "steps": {
       "upload": {
         "title": "放入圖片",
@@ -140,7 +139,7 @@
       },
       "analyze": {
         "title": "開始分析",
-        "description": "準備好再登入進行分析。"
+        "description": "準備好就開始分析。"
       }
     },
     "analyze": "開始分析",

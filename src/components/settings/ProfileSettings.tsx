@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
@@ -10,6 +11,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 export function ProfileSettings() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const logout = useAuthStore((state) => state.logout);
@@ -28,6 +30,10 @@ export function ProfileSettings() {
   };
 
   const hasChanges = displayName !== user?.displayName;
+  const handleLogout = () => {
+    navigate('/', { replace: true });
+    logout();
+  };
 
   return (
     <div className="space-y-6">
@@ -122,7 +128,7 @@ export function ProfileSettings() {
       <ConfirmDialog
         isOpen={isLogoutOpen}
         onClose={() => setIsLogoutOpen(false)}
-        onConfirm={logout}
+        onConfirm={handleLogout}
         title={t('settings.profile.logOutConfirm.title')}
         message={t('settings.profile.logOutConfirm.message')}
         confirmText={t('settings.profile.logOut')}

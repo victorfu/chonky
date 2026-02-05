@@ -157,9 +157,6 @@ export function ScreenshotPage() {
           <div className="relative flex flex-col gap-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <Badge variant="secondary" size="sm">
-                  {t('screenshot.heroBadge', 'No login required to explore')}
-                </Badge>
                 <h1 className="mt-3 text-3xl sm:text-4xl font-bold">
                   {t('screenshot.heroTitle', 'Explore images before you sign in')}
                 </h1>
@@ -230,8 +227,6 @@ export function ScreenshotPage() {
               selectedMode={selectedMode}
               selectedModel={selectedModel}
               isAnalyzing={isAnalyzing}
-              isAuthenticated={isAuthenticated}
-              onSignIn={handleSignIn}
               onModeChange={setMode}
               onModelChange={(value) => setModel(value as ModelType)}
               onAnalyze={handleAnalyze}

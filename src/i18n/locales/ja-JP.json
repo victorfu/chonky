@@ -122,13 +122,12 @@
   "screenshot": {
     "title": "画像分析",
     "subtitle": "AIによる画像解析",
-    "heroBadge": "ログイン不要で閲覧可能",
-    "heroTitle": "ログイン前に画像を探索",
-    "heroSubtitle": "スクリーンショットをアップロードし、モードを選び、分析を実行する時だけログイン。",
+    "heroTitle": "スクリーンショットを探索",
+    "heroSubtitle": "スクリーンショットをアップロードしてモードを選び、分析の準備ができたら続行。",
     "signInCta": "ログイン",
-    "signInHint": "ログイン後にここへ戻ります。",
-    "loginRequired": "分析にはログインが必要です",
-    "signInToAnalyze": "ログインして分析",
+    "signInHint": "確認後にこのページへ戻ります。",
+    "loginRequired": "分析前に確認が必要です。",
+    "signInToAnalyze": "分析を開始",
     "steps": {
       "upload": {
         "title": "画像を追加",
@@ -140,7 +139,7 @@
       },
       "analyze": {
         "title": "分析を実行",
-        "description": "準備ができたらログインして分析。"
+        "description": "準備ができたら分析を開始。"
       }
     },
     "analyze": "分析する",
