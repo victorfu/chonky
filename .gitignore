@@ -33,3 +33,4 @@ coverage/
 
 .claude
 .codex
+.spec-workflow

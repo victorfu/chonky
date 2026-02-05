@@ -5,7 +5,7 @@ export interface KeyboardShortcut {
   metaKey?: boolean;
   shiftKey?: boolean;
   description: string;
-  category: 'global' | 'chat' | 'analyze';
+  category: 'global' | 'chat';
 }
 
 export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
@@ -53,14 +53,6 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
     category: 'chat',
   },
 
-  // Analyze
-  {
-    id: 'paste-screenshot',
-    key: 'v',
-    ctrlKey: true,
-    description: 'Paste screenshot from clipboard',
-    category: 'analyze',
-  },
 ];
 
 export function getShortcutDisplay(shortcut: KeyboardShortcut): string {

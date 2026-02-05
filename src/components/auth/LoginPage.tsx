@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, type Location } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Logo } from '@/components/ui/Logo';
@@ -74,20 +75,20 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
           <h1 className="text-2xl font-bold">{t('auth.welcome', { appName })}</h1>
-          <p className="text-base-content/60 mt-2">{t('auth.tagline')}</p>
+          <p className="text-muted-foreground mt-2">{t('auth.tagline')}</p>
         </div>
 
-        <div className="bg-base-100 rounded-lg shadow-card p-6">
+        <div className="bg-background rounded-lg shadow-card p-6">
           {/* Error message */}
           {error && (
-            <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
               {error}
             </div>
           )}
@@ -97,10 +98,10 @@ export function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-base-300 rounded-lg bg-base-100 hover:bg-base-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-border rounded-lg bg-background hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
-              <span className="loading loading-spinner loading-sm"></span>
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <GoogleIcon />
             )}
@@ -110,9 +111,6 @@ export function LoginPage() {
           </button>
         </div>
 
-        <p className="text-center text-sm text-base-content/50 mt-6">
-          {t('auth.localStorageNote')}
-        </p>
       </div>
     </div>
   );

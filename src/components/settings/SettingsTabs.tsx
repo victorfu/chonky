@@ -14,14 +14,16 @@ export function SettingsTabs({ activeTab, onChange }: SettingsTabsProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="tabs tabs-boxed bg-base-200/50 p-1">
+    <div className="inline-flex rounded-lg bg-muted/50 p-1">
       {tabIds.map((tabId) => (
         <button
           key={tabId}
           onClick={() => onChange(tabId)}
           className={cn(
-            'tab',
-            activeTab === tabId && 'tab-active'
+            'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+            activeTab === tabId
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
           )}
         >
           {t(`settings.tabs.${tabId}`)}

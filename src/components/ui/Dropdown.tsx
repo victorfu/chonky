@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { cn } from '@/utils/cn';
 
 interface DropdownItem {
@@ -19,84 +20,49 @@ interface DropdownProps {
   className?: string;
 }
 
-const positions = {
-  'bottom-start': 'dropdown-bottom dropdown-start',
-  'bottom-end': 'dropdown-bottom dropdown-end',
-  'top-start': 'dropdown-top dropdown-start',
-  'top-end': 'dropdown-top dropdown-end',
+const alignMap: Record<string, 'start' | 'end'> = {
+  'bottom-start': 'start', 'bottom-end': 'end', 'top-start': 'start', 'top-end': 'end',
+};
+const sideMap: Record<string, 'bottom' | 'top'> = {
+  'bottom-start': 'bottom', 'bottom-end': 'bottom', 'top-start': 'top', 'top-end': 'top',
 };
 
-export function Dropdown({
-  trigger,
-  items,
-  position = 'bottom-end',
-  closeOnSelect = true,
-  className,
-}: DropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleItemClick = (item: DropdownItem) => {
-    if (item.disabled) return;
-    item.onClick();
-    if (closeOnSelect) {
-      setIsOpen(false);
-    }
-  };
-
+export function Dropdown({ trigger, items, position = 'bottom-end', className }: DropdownProps) {
   return (
-    <div ref={dropdownRef} className={cn('dropdown', positions[position], className)}>
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        tabIndex={0}
-        role="button"
-      >
+    <DropdownMenuPrimitive.Root>
+      <DropdownMenuPrimitive.Trigger asChild>
         {trigger}
-      </div>
-      {isOpen && (
-        <ul
-          tabIndex={0}
-          className="dropdown-content z-[1] menu p-2 shadow-dropdown bg-base-100 rounded-lg w-52 border border-base-300"
+      </DropdownMenuPrimitive.Trigger>
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.Content
+          side={sideMap[position]}
+          align={alignMap[position]}
+          sideOffset={4}
+          className={cn(
+            'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-dropdown animate-in fade-in-0 zoom-in-95',
+            className
+          )}
         >
           {items.map((item) =>
             item.divider ? (
-              <div key={item.id} className="my-1 h-px bg-base-300" />
+              <DropdownMenuPrimitive.Separator key={item.id} className="my-1 h-px bg-border" />
             ) : (
-              <li key={item.id}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleItemClick(item);
-                  }}
-                  disabled={item.disabled}
-                  className={cn(
-                    'flex items-center gap-2 w-full',
-                    item.danger && 'text-error hover:bg-error/10',
-                    item.disabled && 'opacity-50 cursor-not-allowed'
-                  )}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              </li>
+              <DropdownMenuPrimitive.Item
+                key={item.id}
+                disabled={item.disabled}
+                onSelect={item.onClick}
+                className={cn(
+                  'relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                  item.danger && 'text-destructive focus:bg-destructive/10 focus:text-destructive'
+                )}
+              >
+                {item.icon}
+                {item.label}
+              </DropdownMenuPrimitive.Item>
             )
           )}
-        </ul>
-      )}
-    </div>
+        </DropdownMenuPrimitive.Content>
+      </DropdownMenuPrimitive.Portal>
+    </DropdownMenuPrimitive.Root>
   );
 }

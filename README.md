@@ -1,6 +1,6 @@
 # Chonky
 
-Chonky is an AI-powered screenshot and image analysis web app built with React, TypeScript, and Firebase. It uses Firebase AI (Gemini) to explain images, extract or translate text, and generate background/person cutouts with streaming results.
+Chonky is an AI-powered screenshot and image analysis web app built with React, TypeScript, and Firebase. It uses Firebase AI (Gemini) to explain images, extract or translate text, and generate background cutouts with streaming results.
 
 ## ✨ Features
 
@@ -9,13 +9,11 @@ Chonky is an AI-powered screenshot and image analysis web app built with React, 
   - **OCR**: Extract text while preserving structure.
   - **Translate**: Translate text within images.
   - **Remove Background**: Generate a transparent cutout of the main subject.
-  - **Person Cutout**: Segment people from the image.
 - **Model Selection**: Choose Gemini 2.5 Flash, Pro, or Flash Lite.
 - **Streaming Results**: Reanalyze, copy output, and download processed images.
 - **Smart Uploads**: Drag-and-drop, file selection, and clipboard paste with preview.
 - **Sign-in on Demand**: Browse and prepare before signing in; analysis requires Google login.
-- **Settings**: Language (en-US, ja-JP, zh-TW), theme (light/dark/system), and profile updates.
-- **Local Data Tools**: Export/import local data as JSON.
+- **Settings Sync**: Language (en-US, ja-JP, zh-TW), theme (light/dark/system), and profile preferences synced via Firestore.
 - **Productivity UX**: Command palette, collapsible sidebar, and keyboard shortcuts.
 
 ## 🚀 Tech Stack
@@ -67,7 +65,6 @@ Required:
 
 Common optional settings:
 - `VITE_APP_NAME`
-- `VITE_STORAGE_PREFIX` (localStorage namespace)
 - `VITE_FIREBASE_APPCHECK_KEY` (enable App Check)
 - `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` (local dev)
 - `VITE_FIREBASE_STORAGE_BUCKET`
@@ -75,7 +72,21 @@ Common optional settings:
 - `VITE_FIREBASE_DATABASE_URL`
 - `VITE_FIREBASE_FIRESTORE_DATABASE_NAME`
 
-Note: `.env.example` includes `VITE_API_BASE_URL` and `VITE_ENABLE_MOCK`, but the current app does not read them.
+`VITE_API_BASE_URL` is used by the Vite dev server proxy (`vite.config.ts`).
+
+### Firestore Rules
+
+This app stores user settings in Firestore collection `user_settings/{uid}`.
+
+1. Deploy the bundled security rules:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+2. Ensure authenticated users can only read/write their own settings document.
+
+The repository includes:
+- `firestore.rules`
+- `firebase.json` (points Firestore to the rules file)
 
 ### Development
 
@@ -106,7 +117,7 @@ src/
 ├── constants/       # Global constants and configuration
 ├── hooks/           # Custom React hooks
 ├── i18n/            # Internationalization setup and translations
-├── services/        # Firebase + AI services, storage, theme
+├── services/        # Firebase + AI services and Firestore-backed settings
 ├── stores/          # Zustand state stores
 ├── types/           # TypeScript type definitions
 └── utils/           # Helper functions and utilities

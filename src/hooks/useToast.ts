@@ -14,7 +14,6 @@ interface ToastOptions {
 export function useToast() {
   const addToast = useUIStore((state) => state.addToast);
   const removeToast = useUIStore((state) => state.removeToast);
-  const toasts = useUIStore((state) => state.toasts);
 
   const toast = useCallback(
     (message: string, type: ToastType = 'info', options?: ToastOptions) => {
@@ -55,6 +54,5 @@ export function useToast() {
     warning,
     info,
     remove: removeToast,
-    toasts,
   };
 }

@@ -17,6 +17,7 @@ export {
   DEFAULT_SETTINGS,
   DEFAULT_MODEL,
   SUPPORTED_MODELS,
+  MODEL_LABELS,
   isValidModel,
   getValidModelOrDefault,
 } from './settings';
@@ -24,6 +25,5 @@ export {
 // API types
 export type { ApiResponse, ApiError } from './api';
 
-// Screenshot types
-export type { AnalysisMode, AnalysisResultType, ScreenshotAnalysis, AnalysisModeConfig } from './screenshot';
-export { ANALYSIS_MODES, ANALYSIS_MODE_CONFIGS } from './screenshot';
+// Chat types
+export type { ChatRole, ChatMessageStatus, ChatMessage, ChatThreadMeta } from './chat';

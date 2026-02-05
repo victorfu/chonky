@@ -43,9 +43,9 @@ export class ErrorBoundary extends Component<Props, State> {
         <Translation>
           {(t) => (
             <div className="flex flex-col items-center justify-center min-h-[200px] p-8 text-center">
-              <AlertTriangle className="w-12 h-12 text-error mb-4" />
+              <AlertTriangle className="w-12 h-12 text-destructive mb-4" />
               <h2 className="text-lg font-semibold mb-2">{t('errors.generic')}</h2>
-              <p className="text-base-content/60 mb-4 max-w-md">
+              <p className="text-muted-foreground mb-4 max-w-md">
                 {this.state.error?.message || t('errors.generic')}
               </p>
               <Button onClick={this.handleReset} variant="outline">

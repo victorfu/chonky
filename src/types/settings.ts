@@ -11,6 +11,12 @@ export const SUPPORTED_MODELS: readonly ModelType[] = [
   'gemini-2.5-flash-lite',
 ] as const;
 
+export const MODEL_LABELS: Record<ModelType, string> = {
+  'gemini-2.5-flash': 'Gemini 2.5 Flash',
+  'gemini-2.5-pro': 'Gemini 2.5 Pro',
+  'gemini-2.5-flash-lite': 'Gemini 2.5 Flash Lite',
+};
+
 export function isValidModel(model: string): model is ModelType {
   return SUPPORTED_MODELS.includes(model as ModelType);
 }

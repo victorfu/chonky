@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Camera, Settings } from 'lucide-react';
+import { MessageSquareText, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUIStore } from '@/stores/useUIStore';
 import { Tooltip } from '@/components/ui/Tooltip';
@@ -15,7 +15,7 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
   const isMobileOpen = useUIStore((state) => state.isMobileSidebarOpen);
 
   const navItems = [
-    { to: '/', icon: Camera, label: t('nav.analyze', 'Home'), end: true },
+    { to: '/', icon: MessageSquareText, label: t('nav.chat', 'Chat'), end: true },
     { to: '/settings', icon: Settings, label: t('nav.settings', 'Settings') },
   ];
 
@@ -36,8 +36,8 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
               cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors',
                 isActive
-                  ? 'bg-base-200 text-base-content'
-                  : 'text-base-content/70 hover:bg-base-200 hover:text-base-content',
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 !showLabels && 'justify-center px-2'
               )
             }

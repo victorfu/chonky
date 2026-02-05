@@ -9,7 +9,7 @@ export function GlobalLoading() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-      <div className="bg-base-100 rounded-lg p-6 shadow-xl flex items-center gap-3">
+      <div className="bg-background rounded-lg p-6 shadow-xl flex items-center gap-3">
         <LoadingSpinner size="md" />
         <span>{message || 'Loading...'}</span>
       </div>

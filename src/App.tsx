@@ -1,33 +1,46 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { LoginPage } from '@/components/auth/LoginPage';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { ScreenshotPage } from '@/components/screenshots/ScreenshotPage';
-import { SettingsPage } from '@/components/settings/SettingsPage';
+import { ChatHomePage } from '@/components/chat/ChatHomePage';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useChatStore } from '@/stores/useChatStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
-import { themeService } from '@/services/theme';
+
+const LazyLoginPage = lazy(() =>
+  import('@/components/auth/LoginPage').then((m) => ({ default: m.LoginPage }))
+);
+const LazySettingsPage = lazy(() =>
+  import('@/components/settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))
+);
+
+function RouteFallback() {
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <LoadingSpinner size="lg" />
+    </div>
+  );
+}
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const initAuth = useAuthStore((state) => state.initialize);
+  const initChat = useChatStore((state) => state.initialize);
   const initSettings = useSettingsStore((state) => state.initialize);
 
   useEffect(() => {
-    // Initialize theme first
-    themeService.initialize();
-
     // Initialize Firebase Auth (returns unsubscribe function)
     const unsubscribeAuth = initAuth();
+    const unsubscribeChat = initChat();
+    const unsubscribeSettings = initSettings();
 
-    // Initialize other stores
-    initSettings();
-
-    // Cleanup: unsubscribe from Firebase Auth listener on unmount
+    // Cleanup: unsubscribe listeners on unmount
     return () => {
       unsubscribeAuth();
+      unsubscribeChat();
+      unsubscribeSettings();
     };
-  }, [initAuth, initSettings]);
+  }, [initAuth, initChat, initSettings]);
 
   return <>{children}</>;
 }
@@ -38,14 +51,12 @@ function App() {
       <AppInitializer>
         <Routes>
           {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<Suspense fallback={<RouteFallback />}><LazyLoginPage /></Suspense>} />
 
           {/* App routes */}
           <Route element={<MainLayout />}>
             {/* Homepage (public) */}
-            <Route index element={<ScreenshotPage />} />
-            <Route path="analyze" element={<Navigate to="/" replace />} />
-
+            <Route index element={<ChatHomePage />} />
             {/* Protected routes */}
             <Route
               element={
@@ -54,7 +65,7 @@ function App() {
                 </AuthGuard>
               }
             >
-              <Route path="settings" element={<SettingsPage />} />
+              <Route path="settings" element={<Suspense fallback={<RouteFallback />}><LazySettingsPage /></Suspense>} />
             </Route>
           </Route>
 

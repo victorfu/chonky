@@ -13,20 +13,18 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
   options: SelectOption[];
   placeholder?: string;
   onChange?: (value: string) => void;
-  /** Size variant */
   size?: 'xs' | 'sm' | 'md' | 'lg';
-  /** Inline mode - removes form-control wrapper and full width */
   inline?: boolean;
 }
 
 const sizeClasses = {
-  xs: 'select-xs',
-  sm: 'select-sm',
-  md: '',
-  lg: 'select-lg',
+  xs: 'h-7 text-xs',
+  sm: 'h-8 text-sm',
+  md: 'h-10 text-sm',
+  lg: 'h-12 text-base',
 };
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, placeholder, onChange, className, size = 'md', inline = false, ...props }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       onChange?.(e.target.value);
@@ -36,19 +34,17 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={cn(
-          'select select-bordered',
+          'flex rounded-md border border-input bg-background px-3 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
           sizeClasses[size],
           !inline && 'w-full',
-          error && 'select-error',
+          error && 'border-destructive focus-visible:ring-destructive',
           className
         )}
         onChange={handleChange}
         {...props}
       >
         {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
+          <option value="" disabled>{placeholder}</option>
         )}
         {options.map((option) => (
           <option key={option.value} value={option.value} disabled={option.disabled}>
@@ -58,24 +54,16 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       </select>
     );
 
-    // Inline mode - just return the select without wrapper
-    if (inline) {
-      return selectElement;
-    }
+    if (inline) return selectElement;
 
-    // Form mode - with wrapper, label, and error
     return (
-      <div className="form-control w-full">
+      <div className="w-full space-y-2">
         {label && (
-          <label className="label">
-            <span className="label-text">{label}</span>
-          </label>
+          <label className="text-sm font-medium leading-none">{label}</label>
         )}
         {selectElement}
         {error && (
-          <label className="label">
-            <span className="label-text-alt text-error">{error}</span>
-          </label>
+          <p className="text-sm text-destructive">{error}</p>
         )}
       </div>
     );
@@ -83,3 +71,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 );
 
 Select.displayName = 'Select';
+export { Select };

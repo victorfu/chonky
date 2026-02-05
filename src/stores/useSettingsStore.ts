@@ -1,78 +1,192 @@
 import { create } from 'zustand';
 import type { UserSettings, ThemeMode } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
-import * as storage from '@/services/storage';
 import { themeService } from '@/services/theme';
+import {
+  ensureDefaultUserSettings,
+  normalizeUserSettings,
+  resetUserSettings,
+  subscribeUserSettings,
+  upsertUserSettings,
+} from '@/services/firestoreSettings';
+import { useAuthStore } from './useAuthStore';
+import i18n from '@/i18n';
+
+function applySettingsSideEffects(settings: UserSettings) {
+  themeService.setTheme(settings.appearance.theme);
+  void i18n.changeLanguage(settings.general.language);
+}
+
+function mergeSettings(
+  current: UserSettings,
+  updates: Partial<UserSettings>
+): UserSettings {
+  return normalizeUserSettings({
+    general: { ...current.general, ...updates.general },
+    appearance: { ...current.appearance, ...updates.appearance },
+    chat: { ...current.chat, ...updates.chat },
+    profile: { ...current.profile, ...updates.profile },
+  });
+}
 
 interface SettingsStore {
   settings: UserSettings;
   isLoading: boolean;
 
   // Actions
-  initialize: () => void;
-  updateSettings: (updates: Partial<UserSettings>) => void;
-  updateGeneralSettings: (updates: Partial<UserSettings['general']>) => void;
-  updateAppearanceSettings: (updates: Partial<UserSettings['appearance']>) => void;
-  updateChatSettings: (updates: Partial<UserSettings['chat']>) => void;
-  updateProfileSettings: (updates: Partial<UserSettings['profile']>) => void;
-  setTheme: (theme: ThemeMode) => void;
-  resetSettings: () => void;
+  initialize: () => () => void;
+  updateSettings: (updates: Partial<UserSettings>) => Promise<void>;
+  updateGeneralSettings: (updates: Partial<UserSettings['general']>) => Promise<void>;
+  updateAppearanceSettings: (updates: Partial<UserSettings['appearance']>) => Promise<void>;
+  updateChatSettings: (updates: Partial<UserSettings['chat']>) => Promise<void>;
+  updateProfileSettings: (updates: Partial<UserSettings['profile']>) => Promise<void>;
+  setTheme: (theme: ThemeMode) => Promise<void>;
+  resetSettings: () => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  settings: DEFAULT_SETTINGS,
-  isLoading: true,
+export const useSettingsStore = create<SettingsStore>((set, get) => {
+  let authStoreUnsubscribe: (() => void) | null = null;
+  let firestoreSettingsUnsubscribe: (() => void) | null = null;
+  let activeUid: string | null = null;
 
-  initialize: () => {
-    const settings = storage.getSettings();
-    set({ settings, isLoading: false });
+  return {
+    settings: DEFAULT_SETTINGS,
+    isLoading: true,
 
-    // Initialize theme
-    themeService.setTheme(settings.appearance.theme);
-  },
+    initialize: () => {
+      themeService.initialize(DEFAULT_SETTINGS.appearance.theme);
+      void i18n.changeLanguage(DEFAULT_SETTINGS.general.language);
+      set({ settings: DEFAULT_SETTINGS, isLoading: false });
 
-  updateSettings: (updates) => {
-    const updated = storage.updateSettings(updates);
-    set({ settings: updated });
-  },
+      const bindUserSettings = async (uid: string | null) => {
+        if (activeUid === uid) {
+          return;
+        }
 
-  updateGeneralSettings: (updates) => {
-    get().updateSettings({
-      general: { ...get().settings.general, ...updates },
-    });
-  },
+        firestoreSettingsUnsubscribe?.();
+        firestoreSettingsUnsubscribe = null;
+        activeUid = uid;
 
-  updateAppearanceSettings: (updates) => {
-    const newSettings = {
-      appearance: { ...get().settings.appearance, ...updates },
-    };
-    get().updateSettings(newSettings);
+        if (!uid) {
+          set({ settings: DEFAULT_SETTINGS, isLoading: false });
+          applySettingsSideEffects(DEFAULT_SETTINGS);
+          return;
+        }
 
-    // Apply theme if changed
-    if (updates.theme) {
-      themeService.setTheme(updates.theme);
-    }
-  },
+        set({ isLoading: true });
+        const currentUid = uid;
 
-  updateChatSettings: (updates) => {
-    get().updateSettings({
-      chat: { ...get().settings.chat, ...updates },
-    });
-  },
+        try {
+          await ensureDefaultUserSettings(uid);
+        } catch (error) {
+          console.error('Failed to ensure default Firestore settings:', error);
+        }
 
-  updateProfileSettings: (updates) => {
-    get().updateSettings({
-      profile: { ...get().settings.profile, ...updates },
-    });
-  },
+        if (activeUid !== currentUid) {
+          return;
+        }
 
-  setTheme: (theme) => {
-    get().updateAppearanceSettings({ theme });
-  },
+        firestoreSettingsUnsubscribe = subscribeUserSettings(
+          uid,
+          (settings) => {
+            const normalized = normalizeUserSettings(settings);
+            set({ settings: normalized, isLoading: false });
+            applySettingsSideEffects(normalized);
+          },
+          (error) => {
+            console.error('Failed to subscribe Firestore settings:', error);
+            set({ settings: DEFAULT_SETTINGS, isLoading: false });
+            applySettingsSideEffects(DEFAULT_SETTINGS);
+          }
+        );
+      };
 
-  resetSettings: () => {
-    const settings = storage.resetSettings();
-    set({ settings });
-    themeService.setTheme(settings.appearance.theme);
-  },
-}));
+      void bindUserSettings(useAuthStore.getState().user?.id ?? null);
+
+      authStoreUnsubscribe?.();
+      authStoreUnsubscribe = useAuthStore.subscribe((state, previousState) => {
+        const uid = state.user?.id ?? null;
+        const previousUid = previousState.user?.id ?? null;
+
+        if (uid !== previousUid) {
+          void bindUserSettings(uid);
+        }
+      });
+
+      return () => {
+        authStoreUnsubscribe?.();
+        authStoreUnsubscribe = null;
+        firestoreSettingsUnsubscribe?.();
+        firestoreSettingsUnsubscribe = null;
+        activeUid = null;
+      };
+    },
+
+    updateSettings: async (updates) => {
+      const uid = useAuthStore.getState().user?.id;
+      if (!uid) {
+        throw new Error('User must be signed in to update settings');
+      }
+
+      const previous = get().settings;
+      const next = mergeSettings(previous, updates);
+      set({ settings: next });
+      applySettingsSideEffects(next);
+
+      try {
+        await upsertUserSettings(uid, next);
+      } catch (error) {
+        set({ settings: previous });
+        applySettingsSideEffects(previous);
+        throw error;
+      }
+    },
+
+    updateGeneralSettings: async (updates) => {
+      await get().updateSettings({
+        general: { ...get().settings.general, ...updates },
+      });
+    },
+
+    updateAppearanceSettings: async (updates) => {
+      await get().updateSettings({
+        appearance: { ...get().settings.appearance, ...updates },
+      });
+    },
+
+    updateChatSettings: async (updates) => {
+      await get().updateSettings({
+        chat: { ...get().settings.chat, ...updates },
+      });
+    },
+
+    updateProfileSettings: async (updates) => {
+      await get().updateSettings({
+        profile: { ...get().settings.profile, ...updates },
+      });
+    },
+
+    setTheme: async (theme) => {
+      await get().updateAppearanceSettings({ theme });
+    },
+
+    resetSettings: async () => {
+      const uid = useAuthStore.getState().user?.id;
+      if (!uid) {
+        throw new Error('User must be signed in to reset settings');
+      }
+
+      const previous = get().settings;
+      set({ settings: DEFAULT_SETTINGS });
+      applySettingsSideEffects(DEFAULT_SETTINGS);
+
+      try {
+        await resetUserSettings(uid);
+      } catch (error) {
+        set({ settings: previous });
+        applySettingsSideEffects(previous);
+        throw error;
+      }
+    },
+  };
+});

@@ -1,7 +1,7 @@
 // Core
 export { Logo } from './Logo';
 export { Avatar } from './Avatar';
-export { Button } from './Button';
+export { Button, buttonVariants } from './Button';
 export { IconButton } from './IconButton';
 
 // Form
@@ -13,7 +13,7 @@ export { Toggle } from './Toggle';
 export { Slider } from './Slider';
 
 // Display
-export { Badge } from './Badge';
+export { Badge, badgeVariants } from './Badge';
 export { Card, CardHeader, CardTitle, CardContent, CardFooter } from './Card';
 export { Tooltip } from './Tooltip';
 

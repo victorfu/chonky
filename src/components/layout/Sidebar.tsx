@@ -50,7 +50,7 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'fixed left-0 top-0 h-full bg-base-100 border-r border-base-300 flex flex-col transition-all duration-300 z-50',
+          'fixed left-0 top-0 h-full bg-background border-r border-border flex flex-col transition-all duration-300 z-50',
           // Desktop: show based on collapsed state
           'hidden lg:flex',
           isCollapsed ? 'lg:w-16' : 'lg:w-64',
@@ -59,7 +59,7 @@ export function Sidebar() {
         )}
       >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-base-300">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className={cn('flex items-center gap-2', isCollapsed && !isMobileOpen && 'justify-center w-full')}>
           <Logo size="md" />
           {(!isCollapsed || isMobileOpen) && <span className="font-semibold">{import.meta.env.VITE_APP_NAME}</span>}
@@ -104,7 +104,7 @@ export function Sidebar() {
       </div>
 
       {/* User menu */}
-      <div className="border-t border-base-300">
+      <div className="border-t border-border">
         <UserMenu />
       </div>
     </aside>

@@ -32,8 +32,8 @@
   },
   "auth": {
     "welcome": "{{appName}} へようこそ",
-    "tagline": "RAG 技術を活用した AI ドキュメント Q&A",
-    "localStorageNote": "データはブラウザのローカルストレージに保存されます",
+    "tagline": "AIエージェント向けの汎用ワークスペース",
+    "cloudSyncNote": "ログイン後、設定はクラウドに同期保存されます",
     "errors": {
       "operationNotAllowed": "この操作は許可されていません",
       "userDisabled": "このアカウントは無効化されています",
@@ -57,6 +57,9 @@
       "language": "言語",
       "profileSettings": "プロフィール設定",
       "profileSettingsDesc": "プロフィールタブでプロフィール設定を更新してください。",
+      "cloudSyncTitle": "クラウド同期",
+      "cloudSyncDesc": "設定は保存され、ログイン済み端末間で同期されます。",
+      "updateError": "設定の更新に失敗しました",
       "dataManagement": "データ管理",
       "exportData": "データをエクスポート",
       "exportDataDesc": "すべてのデータをJSONファイルとしてダウンロード",
@@ -84,12 +87,16 @@
       "displayName": "表示名",
       "email": "メールアドレス",
       "saveChanges": "変更を保存",
+      "saveSuccess": "プロフィールを更新しました",
+      "saveError": "プロフィールの保存に失敗しました",
       "account": "アカウント",
       "accountId": "アカウントID",
       "memberSince": "登録日",
       "unknown": "不明",
       "dangerZone": "危険ゾーン",
       "logOut": "ログアウト",
+      "loggingOut": "ログアウト中...",
+      "logOutError": "ログアウトに失敗しました",
       "logOutDesc": "このデバイスからアカウントをログアウト",
       "logOutConfirm": {
         "title": "ログアウト",
@@ -103,84 +110,35 @@
   },
   "userMenu": {
     "settings": "設定",
-    "exportData": "データをエクスポート",
-    "importData": "データをインポート",
     "logOut": "ログアウト"
   },
   "commandPalette": {
     "placeholder": "コマンドを検索...",
     "actions": "アクション",
     "navigation": "ナビゲーション",
-    "goToAnalyze": "ホームへ移動",
+    "goToChat": "チャットへ移動",
     "goToSettings": "設定へ移動",
     "noResults": "結果が見つかりません"
   },
   "nav": {
-    "analyze": "ホーム",
+    "chat": "チャット",
     "settings": "設定"
   },
-  "screenshot": {
-    "title": "画像分析",
-    "subtitle": "AIによる画像解析",
-    "heroBadge": "ログイン不要で閲覧可能",
-    "heroTitle": "ログイン前に画像を探索",
-    "heroSubtitle": "スクリーンショットをアップロードし、モードを選び、分析を実行する時だけログイン。",
-    "signInCta": "ログイン",
-    "signInHint": "ログイン後にここへ戻ります。",
-    "loginRequired": "分析にはログインが必要です",
-    "signInToAnalyze": "ログインして分析",
-    "steps": {
-      "upload": {
-        "title": "画像を追加",
-        "description": "貼り付け、ドラッグ、またはファイル選択でプレビュー。"
-      },
-      "choose": {
-        "title": "モードを選ぶ",
-        "description": "説明、OCR、翻訳、背景除去から選択。"
-      },
-      "analyze": {
-        "title": "分析を実行",
-        "description": "準備ができたらログインして分析。"
-      }
+  "chatHome": {
+    "threadLabel": "検索結果",
+    "clearConversation": "クリア",
+    "loading": "読み込み中...",
+    "errorPrefix": "エラー",
+    "roles": {
+      "user": "あなた",
+      "assistant": "アシスタント"
     },
-    "analyze": "分析する",
-    "analyzing": "分析中...",
-    "clear": "クリア",
-    "result": "分析結果",
-    "reanalyze": "再分析",
-    "analysisMode": "分析モード",
-    "dropzone": {
-      "title": "画像をドロップ",
-      "subtitle": "または下のボタンをクリック"
+    "status": {
+      "pending": "検索中...",
+      "error": "失敗"
     },
-    "pasteFromClipboard": "画像を貼り付け",
-    "selectFile": "ファイル選択",
-    "shortcut": "ヒント：Ctrl+Vで貼り付け可能",
-    "modes": {
-      "explain": "説明",
-      "explainDesc": "画像内容の一般的な説明",
-      "ocr": "OCR",
-      "ocrDesc": "画像からテキストを抽出",
-      "translate": "翻訳",
-      "translateDesc": "画像内のテキストを翻訳",
-      "removeBg": "背景除去",
-      "removeBgDesc": "画像の背景を除去",
-      "segmentPerson": "人物切り抜き",
-      "segmentPersonDesc": "画像から人物を切り抜き"
-    },
-    "errors": {
-      "invalidFileType": "画像ファイルを選択してください",
-      "readError": "ファイルの読み取りに失敗しました",
-      "clipboardError": "クリップボードの読み取りに失敗しました",
-      "noImageInClipboard": "クリップボードに画像がありません"
-    },
-    "prompts": {
-      "instruction": "日本語で答えてください。",
-      "explain": "このスクリーンショットの内容を詳しく説明してください：\n- この画像は何を示しているか\n- 主要な要素とその機能\n- 重要な詳細や情報\n- UIインターフェースの場合は、その目的とインタラクション\n\n{{instruction}}",
-      "ocr": "この画像からすべての可視テキストを抽出してください：\n- 元の形式と構造を維持する\n- 複数の列やセクションがある場合は、個別にリストする\n- 認識できないテキストをマークする\n- 表の場合は、表の形式を維持するようにする\n\n{{instruction}}（ただし、原文は翻訳せずにそのままにしてください）。",
-      "translate": "この画像内のすべてのテキストを翻訳してください：\n- すべての非日本語テキストを日本語に翻訳する\n- 元の形式と構造を維持する\n- 専門用語がある場合は、原文と翻訳を提供する\n- 翻訳が難しい単語については、説明を提供する\n\n{{instruction}}",
-      "remove-bg": "この画像の主要なオブジェクトまたは被写体を識別し、その境界座標をJSON形式で返してください。\n\n以下の形式でJSONを返してください：\n```json\n{\n  \"subject\": \"主要な被写体の説明\",\n  \"bounds\": {\n    \"x\": 開始X座標パーセンテージ(0-100),\n    \"y\": 開始Y座標パーセンテージ(0-100),\n    \"width\": 幅パーセンテージ(0-100),\n    \"height\": 高さパーセンテージ(0-100)\n  },\n  \"polygon\": [\n    {\"x\": Xパーセンテージ, \"y\": Yパーセンテージ},\n    ...\n  ]\n}\n```\n\nJSONのみを返し、他の説明は不要です。",
-      "segment-person": "この画像内のすべての人物を識別し、各人物の輪郭座標をJSON形式で返してください。\n\n以下の形式でJSONを返してください：\n```json\n{\n  \"people\": [\n    {\n      \"id\": 1,\n      \"bounds\": {\n        \"x\": 開始X座標パーセンテージ(0-100),\n        \"y\": 開始Y座標パーセンテージ(0-100),\n        \"width\": 幅パーセンテージ(0-100),\n        \"height\": 高さパーセンテージ(0-100)\n      },\n      \"polygon\": [\n        {\"x\": Xパーセンテージ, \"y\": Yパーセンテージ},\n        ...\n      ]\n    }\n  ],\n  \"count\": 人数\n}\n```\n\n画像に人物がいない場合は：{\"people\": [], \"count\": 0}を返してください。\n\nJSONのみを返し、他の説明は不要です。"
+    "composer": {
+      "placeholder": "質問を入力してください..."
     }
   },
   "errors": {

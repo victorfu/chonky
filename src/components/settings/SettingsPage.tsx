@@ -25,7 +25,7 @@ export function SettingsPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="border-b border-base-300 px-4 sm:px-6 py-4 bg-base-100">
+      <div className="border-b border-border px-4 sm:px-6 py-4 bg-background">
         <h1 className="text-xl sm:text-2xl font-bold mb-4">{t('settings.title')}</h1>
         <SettingsTabs activeTab={activeTab} onChange={setActiveTab} />
       </div>

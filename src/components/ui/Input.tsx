@@ -9,42 +9,38 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix
   containerClassName?: string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, leftIcon, rightIcon, containerClassName, className, ...props }, ref) => {
     return (
-      <div className={cn('form-control w-full', containerClassName)}>
+      <div className={cn('w-full space-y-2', containerClassName)}>
         {label && (
-          <label className="label">
-            <span className="label-text">{label}</span>
-          </label>
+          <label className="text-sm font-medium leading-none">{label}</label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
               {leftIcon}
             </div>
           )}
           <input
             ref={ref}
             className={cn(
-              'input input-bordered w-full',
+              'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
-              error && 'input-error',
+              error && 'border-destructive focus-visible:ring-destructive',
               className
             )}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-base-content/50">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground">
               {rightIcon}
             </div>
           )}
         </div>
         {error && (
-          <label className="label">
-            <span className="label-text-alt text-error">{error}</span>
-          </label>
+          <p className="text-sm text-destructive">{error}</p>
         )}
       </div>
     );
@@ -52,3 +48,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = 'Input';
+export { Input };

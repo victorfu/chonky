@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
@@ -7,27 +8,50 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useToast } from '@/hooks/useToast';
 
 export function ProfileSettings() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const logout = useAuthStore((state) => state.logout);
+  const { success, error } = useToast();
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleSave = async () => {
     if (!displayName.trim()) return;
 
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate save
-    updateUser({ displayName: displayName.trim() });
-    setIsSaving(false);
+    try {
+      await updateUser({ displayName: displayName.trim() });
+      success(t('settings.profile.saveSuccess', 'Profile updated successfully'));
+    } catch (err) {
+      error(err instanceof Error ? err.message : t('settings.profile.saveError', 'Failed to save profile'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const hasChanges = displayName !== user?.displayName;
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } catch (err) {
+      error(err instanceof Error ? err.message : t('settings.profile.logOutError', 'Failed to log out'));
+    } finally {
+      setIsLoggingOut(false);
+      setIsLogoutOpen(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -42,7 +66,7 @@ export function ProfileSettings() {
           />
           <div>
             <p className="font-medium">{user?.displayName}</p>
-            <p className="text-sm text-base-content/60">{user?.email}</p>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
         </div>
 
@@ -78,17 +102,17 @@ export function ProfileSettings() {
         <h3 className="font-semibold mb-4">{t('settings.profile.account')}</h3>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div>
               <p className="font-medium">{t('settings.profile.accountId')}</p>
-              <p className="text-sm text-base-content/60 font-mono">{user?.id}</p>
+              <p className="text-sm text-muted-foreground font-mono">{user?.id}</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div>
               <p className="font-medium">{t('settings.profile.memberSince')}</p>
-              <p className="text-sm text-base-content/60">
+              <p className="text-sm text-muted-foreground">
                 {user?.createdAt
                   ? new Date(user.createdAt).toLocaleDateString()
                   : t('settings.profile.unknown')}
@@ -98,13 +122,13 @@ export function ProfileSettings() {
         </div>
       </Card>
 
-      <Card className="border-error/20">
-        <h3 className="font-semibold mb-4 text-error">{t('settings.profile.dangerZone')}</h3>
+      <Card className="border-destructive/20">
+        <h3 className="font-semibold mb-4 text-destructive">{t('settings.profile.dangerZone')}</h3>
 
-        <div className="flex items-center justify-between p-3 bg-error/5 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-destructive/5 rounded-lg">
           <div>
             <p className="font-medium">{t('settings.profile.logOut')}</p>
-            <p className="text-sm text-base-content/60">
+            <p className="text-sm text-muted-foreground">
               {t('settings.profile.logOutDesc')}
             </p>
           </div>
@@ -121,12 +145,13 @@ export function ProfileSettings() {
 
       <ConfirmDialog
         isOpen={isLogoutOpen}
-        onClose={() => setIsLogoutOpen(false)}
-        onConfirm={logout}
+        onClose={() => !isLoggingOut && setIsLogoutOpen(false)}
+        onConfirm={handleLogout}
         title={t('settings.profile.logOutConfirm.title')}
         message={t('settings.profile.logOutConfirm.message')}
         confirmText={t('settings.profile.logOut')}
         variant="danger"
+        loading={isLoggingOut}
       />
     </div>
   );

@@ -9,37 +9,41 @@ import { CommandPalette } from '@/components/common/CommandPalette';
 import { IconButton } from '@/components/ui/IconButton';
 import { Logo } from '@/components/ui/Logo';
 import { useUIStore } from '@/stores/useUIStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { cn } from '@/utils/cn';
 
 export function MainLayout() {
   const isSidebarCollapsed = useUIStore((state) => state.isSidebarCollapsed);
   const setMobileSidebarOpen = useUIStore((state) => state.setMobileSidebarOpen);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const showNavigationSidebar = isAuthenticated;
 
   return (
-    <div className="flex h-screen bg-base-200">
+    <div className="flex h-screen bg-muted">
       <KeyboardShortcuts />
-      <Sidebar />
+      {showNavigationSidebar && <Sidebar />}
 
       {/* Mobile header */}
-      <div className="fixed top-0 left-0 right-0 h-14 bg-base-100 border-b border-base-300 flex items-center px-4 gap-3 z-30 lg:hidden">
-        <IconButton
-          icon={<Menu className="w-5 h-5" />}
-          aria-label="Open menu"
-          onClick={() => setMobileSidebarOpen(true)}
-          variant="ghost"
-        />
-        <Logo size="sm" />
-        <span className="font-semibold">{import.meta.env.VITE_APP_NAME}</span>
-      </div>
+      {showNavigationSidebar && (
+        <div className="fixed top-0 left-0 right-0 h-14 bg-background border-b border-border flex items-center px-4 gap-3 z-30 lg:hidden">
+          <IconButton
+            icon={<Menu className="w-5 h-5" />}
+            aria-label="Open menu"
+            onClick={() => setMobileSidebarOpen(true)}
+            variant="ghost"
+          />
+          <Logo size="sm" />
+          <span className="font-semibold">{import.meta.env.VITE_APP_NAME}</span>
+        </div>
+      )}
 
       <main
         className={cn(
           'flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300',
-          // Desktop: margin based on sidebar state
-          'lg:ml-16',
-          !isSidebarCollapsed && 'lg:ml-64',
-          // Mobile: no margin, but add top padding for header
-          'ml-0 pt-14 lg:pt-0'
+          showNavigationSidebar && 'lg:ml-16',
+          showNavigationSidebar && !isSidebarCollapsed && 'lg:ml-64',
+          showNavigationSidebar ? 'ml-0 pt-14 lg:pt-0' : 'ml-0 pt-0'
         )}
       >
         <ErrorBoundary>

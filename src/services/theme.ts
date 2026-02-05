@@ -1,55 +1,38 @@
 import type { ThemeMode } from '@/types';
-import { getStorageKey } from '@/constants';
 
 class ThemeService {
-  private mediaQuery: MediaQueryList;
+  private mediaQuery: MediaQueryList | null;
   private listeners: Set<(theme: 'light' | 'dark') => void>;
+  private currentTheme: ThemeMode;
 
   constructor() {
-    this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (typeof window !== 'undefined') {
+      this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this.mediaQuery.addEventListener('change', this.handleSystemChange);
+    } else {
+      this.mediaQuery = null;
+    }
     this.listeners = new Set();
-
-    this.mediaQuery.addEventListener('change', this.handleSystemChange);
+    this.currentTheme = 'light';
   }
 
   private handleSystemChange = (e: MediaQueryListEvent) => {
-    const savedTheme = this.getSavedTheme();
-    if (savedTheme === 'auto') {
+    if (this.currentTheme === 'auto') {
       const resolvedTheme = e.matches ? 'dark' : 'light';
       this.applyTheme(resolvedTheme);
       this.listeners.forEach((listener) => listener(resolvedTheme));
     }
   };
 
-  getSavedTheme(): ThemeMode {
-    try {
-      const saved = localStorage.getItem(getStorageKey('THEME'));
-      if (saved === 'light' || saved === 'dark' || saved === 'auto') {
-        return saved;
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-    return 'light';
-  }
-
-  saveTheme(theme: ThemeMode): void {
-    try {
-      localStorage.setItem(getStorageKey('THEME'), theme);
-    } catch {
-      // Ignore localStorage errors
-    }
-  }
-
   getResolvedTheme(theme: ThemeMode): 'light' | 'dark' {
     if (theme === 'auto') {
-      return this.mediaQuery.matches ? 'dark' : 'light';
+      return this.mediaQuery?.matches ? 'dark' : 'light';
     }
     return theme;
   }
 
   applyTheme(resolvedTheme: 'light' | 'dark'): void {
-    document.documentElement.setAttribute('data-theme', resolvedTheme);
+    if (typeof document === 'undefined') return;
     document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
 
     // Update meta theme-color
@@ -63,7 +46,7 @@ class ThemeService {
   }
 
   setTheme(theme: ThemeMode): void {
-    this.saveTheme(theme);
+    this.currentTheme = theme;
     const resolved = this.getResolvedTheme(theme);
     this.applyTheme(resolved);
   }
@@ -73,9 +56,9 @@ class ThemeService {
     return () => this.listeners.delete(listener);
   }
 
-  initialize(): void {
-    const savedTheme = this.getSavedTheme();
-    const resolved = this.getResolvedTheme(savedTheme);
+  initialize(initialTheme: ThemeMode = 'light'): void {
+    this.currentTheme = initialTheme;
+    const resolved = this.getResolvedTheme(initialTheme);
     this.applyTheme(resolved);
   }
 }

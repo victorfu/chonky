@@ -1,5 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
+import { Button } from './Button';
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: ReactNode;
@@ -10,50 +11,27 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const sizes = {
-  sm: 'btn-sm btn-square',
-  md: 'btn-square',
-  lg: 'btn-lg btn-square',
-};
-
-const variants = {
-  primary: 'btn-primary',
-  secondary: 'btn-secondary',
-  ghost: 'btn-ghost',
-  outline: 'btn-outline',
-};
-
-const tooltipPositions = {
-  top: 'tooltip-top',
-  bottom: 'tooltip-bottom',
-  left: 'tooltip-left',
-  right: 'tooltip-right',
+const sizeMap = {
+  sm: 'h-8 w-8' as const,
+  md: 'h-10 w-10' as const,
+  lg: 'h-11 w-11' as const,
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  (
-    { icon, size = 'md', variant = 'ghost', className, tooltip, tooltipPosition = 'top', ...props },
-    ref
-  ) => {
-    const button = (
-      <button
+  ({ icon, size = 'md', variant = 'ghost', className, tooltip, type = 'button', ...props }, ref) => {
+    return (
+      <Button
         ref={ref}
-        className={cn('btn', variants[variant], sizes[size], className)}
+        variant={variant}
+        size="icon"
+        className={cn(sizeMap[size], className)}
+        title={tooltip}
+        type={type}
         {...props}
       >
         {icon}
-      </button>
+      </Button>
     );
-
-    if (tooltip) {
-      return (
-        <div className={cn('tooltip', tooltipPositions[tooltipPosition])} data-tip={tooltip}>
-          {button}
-        </div>
-      );
-    }
-
-    return button;
   }
 );
 

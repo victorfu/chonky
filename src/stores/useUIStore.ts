@@ -53,6 +53,9 @@ interface UIStore {
   setPreviewPanelOpen: (open: boolean) => void;
 }
 
+let nextToastId = 0;
+const toastTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 export const useUIStore = create<UIStore>((set) => ({
   // Sidebar
   isSidebarCollapsed: true,
@@ -79,23 +82,30 @@ export const useUIStore = create<UIStore>((set) => ({
   // Toast
   toasts: [],
   addToast: (toast) => {
-    const id = Date.now().toString();
+    const id = String(++nextToastId);
     set((state) => ({
       toasts: [...state.toasts, { ...toast, id }],
     }));
 
     const duration = toast.duration ?? 5000;
     if (duration > 0) {
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        toastTimers.delete(id);
         set((state) => ({
           toasts: state.toasts.filter((t) => t.id !== id),
         }));
       }, duration);
+      toastTimers.set(id, timerId);
     }
 
     return id;
   },
   removeToast: (id) => {
+    const timerId = toastTimers.get(id);
+    if (timerId != null) {
+      clearTimeout(timerId);
+      toastTimers.delete(id);
+    }
     set((state) => ({
       toasts: state.toasts.filter((t) => t.id !== id),
     }));

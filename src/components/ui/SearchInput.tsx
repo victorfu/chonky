@@ -11,19 +11,8 @@ interface SearchInputProps {
   autoFocus?: boolean;
 }
 
-export function SearchInput({
-  value,
-  onChange,
-  placeholder = 'Search...',
-  onClear,
-  className,
-  autoFocus,
-}: SearchInputProps) {
-  const handleClear = () => {
-    onChange('');
-    onClear?.();
-  };
-
+export function SearchInput({ value, onChange, placeholder = 'Search...', onClear, className, autoFocus }: SearchInputProps) {
+  const handleClear = () => { onChange(''); onClear?.(); };
   return (
     <Input
       value={value}
@@ -32,12 +21,7 @@ export function SearchInput({
       leftIcon={<Search className="w-4 h-4" />}
       rightIcon={
         value ? (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="p-1 hover:bg-base-300 rounded transition-colors"
-            aria-label="Clear search"
-          >
+          <button type="button" onClick={handleClear} className="p-1 hover:bg-muted rounded transition-colors" aria-label="Clear search">
             <X className="w-3 h-3" />
           </button>
         ) : undefined

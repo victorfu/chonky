@@ -8,7 +8,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxHeight?: number;
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, autoGrow = false, maxHeight = 200, className, onChange, ...props }, ref) => {
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const textareaRef = (ref as React.RefObject<HTMLTextAreaElement>) || internalRef;
@@ -28,32 +28,26 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange?.(e);
-      if (autoGrow) {
-        adjustHeight();
-      }
+      if (autoGrow) adjustHeight();
     };
 
     return (
-      <div className="form-control w-full">
+      <div className="w-full space-y-2">
         {label && (
-          <label className="label">
-            <span className="label-text">{label}</span>
-          </label>
+          <label className="text-sm font-medium leading-none">{label}</label>
         )}
         <textarea
           ref={textareaRef}
           className={cn(
-            'textarea textarea-bordered w-full resize-none',
-            error && 'textarea-error',
+            'flex min-h-[42px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none',
+            error && 'border-destructive focus-visible:ring-destructive',
             className
           )}
           onChange={handleChange}
           {...props}
         />
         {error && (
-          <label className="label">
-            <span className="label-text-alt text-error">{error}</span>
-          </label>
+          <p className="text-sm text-destructive">{error}</p>
         )}
       </div>
     );
@@ -61,3 +55,4 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 
 Textarea.displayName = 'Textarea';
+export { Textarea };

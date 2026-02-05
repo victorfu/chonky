@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Camera,
+  MessageSquareText,
   Settings,
   Search,
 } from 'lucide-react';
@@ -32,13 +32,13 @@ export function CommandPalette() {
   const commands: CommandItem[] = useMemo(
     () => [
       {
-        id: 'nav-analyze',
-        title: t('commandPalette.goToAnalyze', 'Go to Home'),
-        icon: <Camera className="w-4 h-4" />,
+        id: 'nav-chat',
+        title: t('commandPalette.goToChat', 'Go to Chat'),
+        icon: <MessageSquareText className="w-4 h-4" />,
         action: () => navigate('/'),
         category: t('commandPalette.navigation'),
       },
-      {
+{
         id: 'nav-settings',
         title: t('commandPalette.goToSettings'),
         icon: <Settings className="w-4 h-4" />,
@@ -102,7 +102,7 @@ export function CommandPalette() {
         />
         <div className="mt-4 max-h-80 overflow-y-auto">
           {filteredCommands.length === 0 ? (
-            <p className="text-center text-base-content/60 py-4">{t('commandPalette.noResults')}</p>
+            <p className="text-center text-muted-foreground py-4">{t('commandPalette.noResults')}</p>
           ) : (
             <div className="space-y-1">
               {filteredCommands.map((cmd, index) => (
@@ -115,11 +115,11 @@ export function CommandPalette() {
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors',
                     index === selectedIndex
-                      ? 'bg-primary text-primary-content'
-                      : 'hover:bg-base-200'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
                   )}
                 >
-                  <span className={index === selectedIndex ? 'text-primary-content' : 'text-base-content/60'}>
+                  <span className={index === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}>
                     {cmd.icon}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export function CommandPalette() {
                     {cmd.description && (
                       <div className={cn(
                         'text-sm truncate',
-                        index === selectedIndex ? 'text-primary-content/70' : 'text-base-content/50'
+                        index === selectedIndex ? 'text-primary-foreground/70' : 'text-muted-foreground/70'
                       )}>
                         {cmd.description}
                       </div>
@@ -135,7 +135,7 @@ export function CommandPalette() {
                   </div>
                   <span className={cn(
                     'text-xs',
-                    index === selectedIndex ? 'text-primary-content/70' : 'text-base-content/40'
+                    index === selectedIndex ? 'text-primary-foreground/70' : 'text-muted-foreground/60'
                   )}>
                     {cmd.category}
                   </span>
