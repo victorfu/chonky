@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 
 const PENDING_ANALYSIS_KEY = 'pending-analysis';
+const DRAFT_IMAGE_KEY = 'draft-image';
 
 type PendingAnalysis = {
   image: string | null;
@@ -43,6 +44,26 @@ function clearPendingAnalysis() {
     sessionStorage.removeItem(PENDING_ANALYSIS_KEY);
   } catch {
     // Ignore storage errors
+  }
+}
+
+function saveDraftImage(image: string | null) {
+  try {
+    if (image) {
+      sessionStorage.setItem(DRAFT_IMAGE_KEY, image);
+    } else {
+      sessionStorage.removeItem(DRAFT_IMAGE_KEY);
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function loadDraftImage(): string | null {
+  try {
+    return sessionStorage.getItem(DRAFT_IMAGE_KEY);
+  } catch {
+    return null;
   }
 }
 
@@ -85,7 +106,12 @@ export function ScreenshotPage() {
   };
 
   const handleAnalyze = () => {
-    if (!isAuthenticated) {
+    const requiresAuth = selectedMode !== 'remove-bg';
+
+    // Keep current image resilient to unexpected refresh during heavy image processing.
+    saveDraftImage(currentImage);
+
+    if (!isAuthenticated && requiresAuth) {
       persistAnalysisSnapshot(true);
       navigate('/login', { state: { from: location, pendingAnalyze: true } });
       return;
@@ -93,6 +119,17 @@ export function ScreenshotPage() {
 
     analyze();
   };
+
+  useEffect(() => {
+    if (currentImage) {
+      return;
+    }
+
+    const draftImage = loadDraftImage();
+    if (draftImage) {
+      setImage(draftImage);
+    }
+  }, [currentImage, setImage]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -119,6 +156,12 @@ export function ScreenshotPage() {
       setTimeout(() => analyze(), 0);
     }
   }, [isAuthenticated, currentImage, analyze, setImage, setMode, setModel]);
+
+  useEffect(() => {
+    if (!currentImage) {
+      saveDraftImage(null);
+    }
+  }, [currentImage]);
 
   // Handle paste event globally
   useEffect(() => {
@@ -172,9 +215,6 @@ export function ScreenshotPage() {
                   <Button variant="secondary" onClick={handleSignIn}>
                     {t('screenshot.signInCta', 'Sign in')}
                   </Button>
-                  <span className="text-xs text-base-content/50">
-                    {t('screenshot.signInHint', 'You will return here after signing in.')}
-                  </span>
                 </div>
               )}
             </div>

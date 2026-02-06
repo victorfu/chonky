@@ -29,6 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       variant = 'primary',
       size = 'md',
+      type = 'button',
       loading = false,
       leftIcon,
       rightIcon,
@@ -50,6 +51,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         disabled={disabled || loading}
+        type={type}
         {...props}
       >
         {loading ? (

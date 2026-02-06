@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    optimizeDeps: {
+      include: ['@imgly/background-removal', 'onnxruntime-web'],
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -25,6 +28,9 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
+    },
+    worker: {
+      format: 'es',
     },
   };
 });

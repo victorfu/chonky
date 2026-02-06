@@ -32,13 +32,23 @@ const tooltipPositions = {
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   (
-    { icon, size = 'md', variant = 'ghost', className, tooltip, tooltipPosition = 'top', ...props },
+    {
+      icon,
+      size = 'md',
+      variant = 'ghost',
+      className,
+      tooltip,
+      tooltipPosition = 'top',
+      type = 'button',
+      ...props
+    },
     ref
   ) => {
     const button = (
       <button
         ref={ref}
         className={cn('btn', variants[variant], sizes[size], className)}
+        type={type}
         {...props}
       >
         {icon}

@@ -3,6 +3,7 @@ import type { ModelType } from '@/types';
 import type { AnalysisMode, AnalysisResultType } from '@/types/screenshot';
 import { ANALYSIS_MODES } from '@/types/screenshot';
 import { analyzeScreenshot } from '@/services/screenshotAnalysis';
+import { preloadBackgroundRemovalModel } from '@/services/image-processing/removeBackground';
 import { useSettingsStore } from './useSettingsStore';
 
 interface ScreenshotStore {
@@ -30,6 +31,14 @@ function isValidMode(mode: string): mode is AnalysisMode {
   return (ANALYSIS_MODES as readonly string[]).includes(mode);
 }
 
+async function warmupBackgroundRemovalModel() {
+  try {
+    await preloadBackgroundRemovalModel();
+  } catch {
+    // Ignore preload failures; analyze() will surface user-facing errors.
+  }
+}
+
 export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
   currentImage: null,
   analysisResult: '',
@@ -42,6 +51,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
   processedImageData: null,
 
   setImage: (base64) => {
+    const mode = get().selectedMode;
     set({
       currentImage: base64,
       analysisResult: '',
@@ -50,6 +60,10 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
       resultType: 'text',
       processedImageData: null,
     });
+
+    if (mode === 'remove-bg') {
+      void warmupBackgroundRemovalModel();
+    }
   },
 
   clearImage: () => {
@@ -67,6 +81,9 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
     // Validate mode is still valid (handles legacy modes like 'code' and 'error')
     if (isValidMode(mode)) {
       set({ selectedMode: mode });
+      if (mode === 'remove-bg') {
+        void warmupBackgroundRemovalModel();
+      }
     } else {
       // Fallback to default mode for legacy/invalid modes
       set({ selectedMode: 'explain' });
@@ -96,8 +113,9 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
     });
 
     try {
-      // Remove data URL prefix if present
-      const base64Data = currentImage.replace(/^data:image\/\w+;base64,/, '');
+      const dataUrlMatch = currentImage.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+      const mimeType = dataUrlMatch?.[1] ?? 'image/png';
+      const base64Data = dataUrlMatch?.[2] ?? currentImage;
 
       const result = await analyzeScreenshot(
         base64Data,
@@ -106,7 +124,8 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
         language,
         (chunk) => {
           set({ streamingResult: chunk });
-        }
+        },
+        mimeType
       );
 
       set({

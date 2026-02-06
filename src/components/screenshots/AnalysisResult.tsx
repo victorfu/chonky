@@ -30,6 +30,7 @@ export function AnalysisResult({
   const [copied, setCopied] = useState(false);
 
   const displayContent = streamingResult || result;
+  const isImageResult = resultType === 'image';
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(displayContent);
@@ -79,7 +80,7 @@ export function AnalysisResult({
               tooltip={t('common.download', 'Download')}
             />
           )}
-          {displayContent && (
+          {displayContent && !isImageResult && (
             <IconButton
               icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               aria-label={t('common.copy', 'Copy')}
@@ -122,7 +123,7 @@ export function AnalysisResult({
         </div>
       )}
 
-      {displayContent && (
+      {!isImageResult && displayContent && (
         <div className="prose prose-sm max-w-none">
           <ReactMarkdown>{displayContent}</ReactMarkdown>
         </div>

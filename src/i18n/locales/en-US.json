@@ -163,23 +163,23 @@
       "translate": "Translate",
       "translateDesc": "Translate text in the image",
       "removeBg": "Remove Background",
-      "removeBgDesc": "Remove image background",
-      "segmentPerson": "Person Cutout",
-      "segmentPersonDesc": "Segment person from the image"
+      "removeBgDesc": "Remove image background"
     },
     "errors": {
       "invalidFileType": "Please select an image file",
       "readError": "Failed to read file",
       "clipboardError": "Failed to read from clipboard",
-      "noImageInClipboard": "No image found in clipboard"
+      "noImageInClipboard": "No image found in clipboard",
+      "imagePipelineLoadFailed": "Failed to load image processing model. Please try again shortly.",
+      "imagePipelineInferenceFailed": "Image processing failed. Please try another image.",
+      "backgroundRemovalFailed": "Background removal failed. Try an image with a clearer subject."
     },
     "prompts": {
       "instruction": "Please answer in English.",
       "explain": "Please explain the content of this screenshot in detail, including:\n- What this image shows\n- The main elements and their functions\n- Any important details or information\n- If it's a UI interface, describe its purpose and interactions\n\n{{instruction}}",
       "ocr": "Please extract all visible text from this image, following these requirements:\n- Maintain the original format and structure\n- If there are multiple columns or sections, list them separately\n- Mark any unrecognizable text\n- If it's a table, try to maintain the table format\n\n{{instruction}} (but keep original text untranslated).",
       "translate": "Please translate all text in this image:\n- Translate all non-English text into English\n- Maintain the original format and structure\n- If there are technical terms, provide original and translation\n- For difficult-to-translate words, provide explanations\n\n{{instruction}}",
-      "remove-bg": "Please identify the main object or subject in this image and return its boundary coordinates in JSON format.\n\nReturn JSON in this format:\n```json\n{\n  \"subject\": \"Description of the main subject\",\n  \"bounds\": {\n    \"x\": starting X coordinate percentage (0-100),\n    \"y\": starting Y coordinate percentage (0-100),\n    \"width\": width percentage (0-100),\n    \"height\": height percentage (0-100)\n  },\n  \"polygon\": [\n    {\"x\": X percentage, \"y\": Y percentage},\n    ...\n  ]\n}\n```\n\nReturn only JSON, no other explanation.",
-      "segment-person": "Please identify all people in this image and return the contour coordinates for each person in JSON format.\n\nReturn JSON in this format:\n```json\n{\n  \"people\": [\n    {\n      \"id\": 1,\n      \"bounds\": {\n        \"x\": starting X coordinate percentage (0-100),\n        \"y\": starting Y coordinate percentage (0-100),\n        \"width\": width percentage (0-100),\n        \"height\": height percentage (0-100)\n      },\n      \"polygon\": [\n        {\"x\": X percentage, \"y\": Y percentage},\n        ...\n      ]\n    }\n  ],\n  \"count\": number of people\n}\n```\n\nIf no people in the image, return: {\"people\": [], \"count\": 0}\n\nReturn only JSON, no other explanation."
+      "remove-bg": "Please identify the main object or subject in this image and return its boundary coordinates in JSON format.\n\nReturn JSON in this format:\n```json\n{\n  \"subject\": \"Description of the main subject\",\n  \"bounds\": {\n    \"x\": starting X coordinate percentage (0-100),\n    \"y\": starting Y coordinate percentage (0-100),\n    \"width\": width percentage (0-100),\n    \"height\": height percentage (0-100)\n  },\n  \"polygon\": [\n    {\"x\": X percentage, \"y\": Y percentage},\n    ...\n  ]\n}\n```\n\nReturn only JSON, no other explanation."
     }
   },
   "errors": {

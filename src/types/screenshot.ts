@@ -4,15 +4,13 @@ export type AnalysisMode =
   | 'explain'        // 通用解釋
   | 'ocr'            // 文字提取
   | 'translate'      // 翻譯
-  | 'remove-bg'      // 去背景
-  | 'segment-person'; // 人物切割
+  | 'remove-bg';     // 去背景
 
 export const ANALYSIS_MODES: readonly AnalysisMode[] = [
   'explain',
   'ocr',
   'translate',
   'remove-bg',
-  'segment-person',
 ] as const;
 
 export interface AnalysisModeConfig {
@@ -46,12 +44,6 @@ export const ANALYSIS_MODE_CONFIGS: Record<AnalysisMode, AnalysisModeConfig> = {
     icon: 'image-minus',
     labelKey: 'screenshot.modes.removeBg',
     descriptionKey: 'screenshot.modes.removeBgDesc',
-  },
-  'segment-person': {
-    id: 'segment-person',
-    icon: 'user-round',
-    labelKey: 'screenshot.modes.segmentPerson',
-    descriptionKey: 'screenshot.modes.segmentPersonDesc',
   },
 };
 

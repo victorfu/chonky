@@ -1,6 +1,6 @@
 # Chonky
 
-Chonky is an AI-powered screenshot and image analysis web app built with React, TypeScript, and Firebase. It uses Firebase AI (Gemini) to explain images, extract or translate text, and generate background/person cutouts with streaming results.
+Chonky is an AI-powered screenshot and image analysis web app built with React, TypeScript, and Firebase. It uses Firebase AI (Gemini) to explain images, extract or translate text, and generate background cutouts with streaming results.
 
 ## ✨ Features
 
@@ -9,7 +9,6 @@ Chonky is an AI-powered screenshot and image analysis web app built with React, 
   - **OCR**: Extract text while preserving structure.
   - **Translate**: Translate text within images.
   - **Remove Background**: Generate a transparent cutout of the main subject.
-  - **Person Cutout**: Segment people from the image.
 - **Model Selection**: Choose Gemini 2.5 Flash, Pro, or Flash Lite.
 - **Streaming Results**: Reanalyze, copy output, and download processed images.
 - **Smart Uploads**: Drag-and-drop, file selection, and clipboard paste with preview.

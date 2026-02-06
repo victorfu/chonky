@@ -1,4 +1,4 @@
-import { Lightbulb, Type, Languages, ImageMinus, UserRound, Trash2, Zap } from 'lucide-react';
+import { Lightbulb, Type, Languages, ImageMinus, Trash2, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisMode } from '@/types/screenshot';
 import { ANALYSIS_MODES } from '@/types/screenshot';
@@ -22,7 +22,6 @@ const modeIcons: Record<AnalysisMode, React.ComponentType<{ className?: string }
   ocr: Type,
   translate: Languages,
   'remove-bg': ImageMinus,
-  'segment-person': UserRound,
 };
 
 const modeLabelKeys: Record<AnalysisMode, string> = {
@@ -30,7 +29,6 @@ const modeLabelKeys: Record<AnalysisMode, string> = {
   ocr: 'screenshot.modes.ocr',
   translate: 'screenshot.modes.translate',
   'remove-bg': 'screenshot.modes.removeBg',
-  'segment-person': 'screenshot.modes.segmentPerson',
 };
 
 const modelOptions = [
@@ -49,6 +47,7 @@ export function FloatingCommandBar({
   onClear,
 }: FloatingCommandBarProps) {
   const { t } = useTranslation();
+  const isImageMode = selectedMode === 'remove-bg';
 
   return (
     <div
@@ -67,6 +66,7 @@ export function FloatingCommandBar({
           return (
             <button
               key={mode}
+              type="button"
               onClick={() => onModeChange(mode)}
               disabled={isAnalyzing}
               title={t(modeLabelKeys[mode], mode)}
@@ -93,17 +93,24 @@ export function FloatingCommandBar({
       <div className="border-t border-base-300 my-3" />
 
       {/* Actions - Mobile: stacked, Desktop: row */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        {/* Model Select - full width on mobile */}
-        <Select
-          value={selectedModel}
-          onChange={(value) => onModelChange(value as ModelType)}
-          options={modelOptions}
-          size="sm"
-          inline
-          className="w-full sm:w-48"
-          disabled={isAnalyzing}
-        />
+      <div
+        className={cn(
+          'flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4',
+          isImageMode ? 'sm:justify-end' : 'sm:justify-between'
+        )}
+      >
+        {/* Model Select - hide for image processing modes */}
+        {!isImageMode && (
+          <Select
+            value={selectedModel}
+            onChange={(value) => onModelChange(value as ModelType)}
+            options={modelOptions}
+            size="sm"
+            inline
+            className="w-full sm:w-48"
+            disabled={isAnalyzing}
+          />
+        )}
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">

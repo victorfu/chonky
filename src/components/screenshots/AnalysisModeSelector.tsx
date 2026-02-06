@@ -1,4 +1,4 @@
-import { Lightbulb, Type, Languages, ImageMinus, UserRound } from 'lucide-react';
+import { Lightbulb, Type, Languages, ImageMinus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AnalysisMode } from '@/types/screenshot';
 import { ANALYSIS_MODES } from '@/types/screenshot';
@@ -14,7 +14,6 @@ const modeIcons: Record<AnalysisMode, React.ComponentType<{ className?: string }
   ocr: Type,
   translate: Languages,
   'remove-bg': ImageMinus,
-  'segment-person': UserRound,
 };
 
 const modeLabelKeys: Record<AnalysisMode, string> = {
@@ -22,7 +21,6 @@ const modeLabelKeys: Record<AnalysisMode, string> = {
   ocr: 'screenshot.modes.ocr',
   translate: 'screenshot.modes.translate',
   'remove-bg': 'screenshot.modes.removeBg',
-  'segment-person': 'screenshot.modes.segmentPerson',
 };
 
 export function AnalysisModeSelector({ selectedMode, onModeChange }: AnalysisModeSelectorProps) {
@@ -41,6 +39,7 @@ export function AnalysisModeSelector({ selectedMode, onModeChange }: AnalysisMod
           return (
             <button
               key={mode}
+              type="button"
               onClick={() => onModeChange(mode)}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg border transition-all',
