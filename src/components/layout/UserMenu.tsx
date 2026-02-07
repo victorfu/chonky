@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, LogOut, Download, Upload, Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +31,7 @@ export function UserMenu() {
   const setTheme = useSettingsStore((state) => state.setTheme);
   const isCollapsed = useUIStore((state) => state.isSidebarCollapsed);
   const isMobileOpen = useUIStore((state) => state.isMobileSidebarOpen);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleExport = () => {
     try {
@@ -65,9 +67,18 @@ export function UserMenu() {
     input.click();
   };
 
-  const handleLogout = () => {
-    navigate('/', { replace: true });
-    logout();
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } catch (err) {
+      error(err instanceof Error ? err.message : t('settings.profile.logOutError', 'Failed to log out'));
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const toggleTheme = () => {
@@ -109,9 +120,12 @@ export function UserMenu() {
     { id: 'divider-2', label: '', icon: null, onClick: () => {}, divider: true },
     {
       id: 'logout',
-      label: t('userMenu.logOut'),
+      label: isLoggingOut
+        ? t('settings.profile.loggingOut', 'Logging out...')
+        : t('userMenu.logOut'),
       icon: <LogOut className="w-4 h-4" />,
       onClick: handleLogout,
+      disabled: isLoggingOut,
       danger: true,
     },
   ];

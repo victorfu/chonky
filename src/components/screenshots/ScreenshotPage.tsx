@@ -72,6 +72,7 @@ export function ScreenshotPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const resumeAttempted = useRef(false);
+  const skipDraftRestoreRef = useRef(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const {
@@ -120,8 +121,20 @@ export function ScreenshotPage() {
     analyze();
   };
 
+  const handleClear = () => {
+    // Prevent immediate draft restoration on the next render after manual clear.
+    skipDraftRestoreRef.current = true;
+    saveDraftImage(null);
+    clearImage();
+  };
+
   useEffect(() => {
     if (currentImage) {
+      return;
+    }
+
+    if (skipDraftRestoreRef.current) {
+      skipDraftRestoreRef.current = false;
       return;
     }
 
@@ -270,7 +283,7 @@ export function ScreenshotPage() {
               onModeChange={setMode}
               onModelChange={(value) => setModel(value as ModelType)}
               onAnalyze={handleAnalyze}
-              onClear={clearImage}
+              onClear={handleClear}
             />
           </div>
         )}
