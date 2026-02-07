@@ -2,6 +2,7 @@ import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { useTheme } from '@/hooks/useTheme';
+import { useToast } from '@/hooks/useToast';
 import { cn } from '@/utils/cn';
 import type { ThemeMode } from '@/types';
 
@@ -14,6 +15,7 @@ const themeOptions: { id: ThemeMode; labelKey: string; icon: typeof Sun }[] = [
 export function AppearanceSettings() {
   const { t } = useTranslation();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { error } = useToast();
 
   return (
     <div className="space-y-6">
@@ -27,7 +29,15 @@ export function AppearanceSettings() {
             return (
               <button
                 key={option.id}
-                onClick={() => setTheme(option.id)}
+                onClick={() => {
+                  void setTheme(option.id).catch((err) => {
+                    error(
+                      err instanceof Error
+                        ? err.message
+                        : t('settings.general.updateError', 'Failed to update settings')
+                    );
+                  });
+                }}
                 className={cn(
                   'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
                   isSelected

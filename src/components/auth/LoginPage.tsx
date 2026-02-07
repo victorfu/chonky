@@ -110,9 +110,6 @@ export function LoginPage() {
           </button>
         </div>
 
-        <p className="text-center text-sm text-base-content/50 mt-6">
-          {t('auth.localStorageNote')}
-        </p>
       </div>
     </div>
   );

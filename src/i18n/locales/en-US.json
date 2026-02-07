@@ -32,8 +32,8 @@
   },
   "auth": {
     "welcome": "Welcome to {{appName}}",
-    "tagline": "AI-powered document Q&A with RAG",
-    "localStorageNote": "Your data is stored locally in your browser",
+    "tagline": "A general workspace for AI agents",
+    "cloudSyncNote": "After sign-in, your preferences sync securely in the cloud",
     "errors": {
       "operationNotAllowed": "This operation is not allowed",
       "userDisabled": "This account has been disabled",
@@ -57,6 +57,9 @@
       "language": "Language",
       "profileSettings": "Profile Settings",
       "profileSettingsDesc": "Update your profile settings in the Profile tab.",
+      "cloudSyncTitle": "Cloud Sync",
+      "cloudSyncDesc": "Your settings are stored in Firestore and sync across signed-in devices.",
+      "updateError": "Failed to update settings",
       "dataManagement": "Data Management",
       "exportData": "Export Data",
       "exportDataDesc": "Download all your data as a JSON file",
@@ -84,12 +87,16 @@
       "displayName": "Display Name",
       "email": "Email",
       "saveChanges": "Save Changes",
+      "saveSuccess": "Profile updated successfully",
+      "saveError": "Failed to save profile",
       "account": "Account",
       "accountId": "Account ID",
       "memberSince": "Member since",
       "unknown": "Unknown",
       "dangerZone": "Danger Zone",
       "logOut": "Log out",
+      "loggingOut": "Logging out...",
+      "logOutError": "Failed to log out",
       "logOutDesc": "Sign out of your account on this device",
       "logOutConfirm": {
         "title": "Log Out",
@@ -103,8 +110,6 @@
   },
   "userMenu": {
     "settings": "Settings",
-    "exportData": "Export Data",
-    "importData": "Import Data",
     "logOut": "Log Out"
   },
   "commandPalette": {

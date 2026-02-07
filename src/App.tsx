@@ -7,25 +7,20 @@ import { ScreenshotPage } from '@/components/screenshots/ScreenshotPage';
 import { SettingsPage } from '@/components/settings/SettingsPage';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
-import { themeService } from '@/services/theme';
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const initAuth = useAuthStore((state) => state.initialize);
   const initSettings = useSettingsStore((state) => state.initialize);
 
   useEffect(() => {
-    // Initialize theme first
-    themeService.initialize();
-
     // Initialize Firebase Auth (returns unsubscribe function)
     const unsubscribeAuth = initAuth();
+    const unsubscribeSettings = initSettings();
 
-    // Initialize other stores
-    initSettings();
-
-    // Cleanup: unsubscribe from Firebase Auth listener on unmount
+    // Cleanup: unsubscribe listeners on unmount
     return () => {
       unsubscribeAuth();
+      unsubscribeSettings();
     };
   }, [initAuth, initSettings]);
 

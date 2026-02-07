@@ -32,8 +32,8 @@
   },
   "auth": {
     "welcome": "歡迎使用 {{appName}}",
-    "tagline": "AI 智慧文件問答系統",
-    "localStorageNote": "您的資料儲存在本機瀏覽器中",
+    "tagline": "面向 AI Agents 的通用工作平台",
+    "cloudSyncNote": "登入後，您的設定會同步儲存至雲端",
     "errors": {
       "operationNotAllowed": "此操作不被允許",
       "userDisabled": "此帳號已被停用",
@@ -57,6 +57,9 @@
       "language": "語言",
       "profileSettings": "個人檔案設定",
       "profileSettingsDesc": "在「個人檔案」分頁中更新您的個人資料。",
+      "cloudSyncTitle": "雲端同步",
+      "cloudSyncDesc": "您的設定會儲存在 Firestore，並在已登入裝置間同步。",
+      "updateError": "更新設定失敗",
       "dataManagement": "資料管理",
       "exportData": "匯出資料",
       "exportDataDesc": "將所有資料下載為 JSON 檔案",
@@ -84,12 +87,16 @@
       "displayName": "顯示名稱",
       "email": "電子郵件",
       "saveChanges": "儲存變更",
+      "saveSuccess": "個人資料已更新",
+      "saveError": "儲存個人資料失敗",
       "account": "帳號",
       "accountId": "帳號 ID",
       "memberSince": "註冊日期",
       "unknown": "未知",
       "dangerZone": "危險區域",
       "logOut": "登出",
+      "loggingOut": "登出中...",
+      "logOutError": "登出失敗",
       "logOutDesc": "從此裝置登出您的帳號",
       "logOutConfirm": {
         "title": "登出",
@@ -103,8 +110,6 @@
   },
   "userMenu": {
     "settings": "設定",
-    "exportData": "匯出資料",
-    "importData": "匯入資料",
     "logOut": "登出"
   },
   "commandPalette": {

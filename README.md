@@ -13,8 +13,7 @@ Chonky is an AI-powered screenshot and image analysis web app built with React, 
 - **Streaming Results**: Reanalyze, copy output, and download processed images.
 - **Smart Uploads**: Drag-and-drop, file selection, and clipboard paste with preview.
 - **Sign-in on Demand**: Browse and prepare before signing in; analysis requires Google login.
-- **Settings**: Language (en-US, ja-JP, zh-TW), theme (light/dark/system), and profile updates.
-- **Local Data Tools**: Export/import local data as JSON.
+- **Settings Sync**: Language (en-US, ja-JP, zh-TW), theme (light/dark/system), and profile preferences synced via Firestore.
 - **Productivity UX**: Command palette, collapsible sidebar, and keyboard shortcuts.
 
 ## 🚀 Tech Stack
@@ -66,7 +65,6 @@ Required:
 
 Common optional settings:
 - `VITE_APP_NAME`
-- `VITE_STORAGE_PREFIX` (localStorage namespace)
 - `VITE_FIREBASE_APPCHECK_KEY` (enable App Check)
 - `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` (local dev)
 - `VITE_FIREBASE_STORAGE_BUCKET`
@@ -75,6 +73,20 @@ Common optional settings:
 - `VITE_FIREBASE_FIRESTORE_DATABASE_NAME`
 
 Note: `.env.example` includes `VITE_API_BASE_URL` and `VITE_ENABLE_MOCK`, but the current app does not read them.
+
+### Firestore Rules
+
+This app stores user settings in Firestore collection `user_settings/{uid}`.
+
+1. Deploy the bundled security rules:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+2. Ensure authenticated users can only read/write their own settings document.
+
+The repository includes:
+- `firestore.rules`
+- `firebase.json` (points Firestore to the rules file)
 
 ### Development
 
@@ -105,7 +117,7 @@ src/
 ├── constants/       # Global constants and configuration
 ├── hooks/           # Custom React hooks
 ├── i18n/            # Internationalization setup and translations
-├── services/        # Firebase + AI services, storage, theme
+├── services/        # Firebase + AI services and Firestore-backed settings
 ├── stores/          # Zustand state stores
 ├── types/           # TypeScript type definitions
 └── utils/           # Helper functions and utilities

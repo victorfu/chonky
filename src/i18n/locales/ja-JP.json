@@ -32,8 +32,8 @@
   },
   "auth": {
     "welcome": "{{appName}} へようこそ",
-    "tagline": "RAG 技術を活用した AI ドキュメント Q&A",
-    "localStorageNote": "データはブラウザのローカルストレージに保存されます",
+    "tagline": "AIエージェント向けの汎用ワークスペース",
+    "cloudSyncNote": "ログイン後、設定はクラウドに同期保存されます",
     "errors": {
       "operationNotAllowed": "この操作は許可されていません",
       "userDisabled": "このアカウントは無効化されています",
@@ -57,6 +57,9 @@
       "language": "言語",
       "profileSettings": "プロフィール設定",
       "profileSettingsDesc": "プロフィールタブでプロフィール設定を更新してください。",
+      "cloudSyncTitle": "クラウド同期",
+      "cloudSyncDesc": "設定は Firestore に保存され、ログイン済み端末間で同期されます。",
+      "updateError": "設定の更新に失敗しました",
       "dataManagement": "データ管理",
       "exportData": "データをエクスポート",
       "exportDataDesc": "すべてのデータをJSONファイルとしてダウンロード",
@@ -84,12 +87,16 @@
       "displayName": "表示名",
       "email": "メールアドレス",
       "saveChanges": "変更を保存",
+      "saveSuccess": "プロフィールを更新しました",
+      "saveError": "プロフィールの保存に失敗しました",
       "account": "アカウント",
       "accountId": "アカウントID",
       "memberSince": "登録日",
       "unknown": "不明",
       "dangerZone": "危険ゾーン",
       "logOut": "ログアウト",
+      "loggingOut": "ログアウト中...",
+      "logOutError": "ログアウトに失敗しました",
       "logOutDesc": "このデバイスからアカウントをログアウト",
       "logOutConfirm": {
         "title": "ログアウト",
@@ -103,8 +110,6 @@
   },
   "userMenu": {
     "settings": "設定",
-    "exportData": "データをエクスポート",
-    "importData": "データをインポート",
     "logOut": "ログアウト"
   },
   "commandPalette": {
