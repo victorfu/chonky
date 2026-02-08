@@ -17,11 +17,13 @@ import {
 } from 'firebase/firestore';
 import type {
   ChatMessage,
+  ChatMessageAttachment,
   ChatMessageStatus,
   ChatRole,
   ChatThreadMeta,
   ModelType,
 } from '@/types';
+import type { AnalysisResultType } from '@/types/screenshot';
 import { db } from './firebase';
 
 const USER_CHATS_COLLECTION = 'user_chats';
@@ -45,6 +47,9 @@ interface FirestoreChatMessage {
   createdAt?: unknown;
   createdAtMs?: unknown;
   model?: unknown;
+  attachment?: unknown;
+  resultType?: unknown;
+  processedImageData?: unknown;
 }
 
 export interface AddChatMessageInput {
@@ -53,6 +58,9 @@ export interface AddChatMessageInput {
   status: ChatMessageStatus;
   model?: ModelType;
   createdAtMs?: number;
+  attachment?: ChatMessageAttachment;
+  resultType?: AnalysisResultType;
+  processedImageData?: string;
 }
 
 function getChatRef(uid: string) {
@@ -110,6 +118,34 @@ function normalizeThread(uid: string, raw: FirestoreChatThread | null | undefine
   };
 }
 
+function isValidResultType(value: unknown): value is AnalysisResultType {
+  return value === 'text' || value === 'image';
+}
+
+function normalizeAttachment(value: unknown): ChatMessageAttachment | undefined {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    (value as Record<string, unknown>).type === 'image' &&
+    'url' in value &&
+    typeof (value as Record<string, unknown>).url === 'string' &&
+    (value as Record<string, unknown>).url !== '' &&
+    'mimeType' in value &&
+    typeof (value as Record<string, unknown>).mimeType === 'string' &&
+    (value as Record<string, unknown>).mimeType !== ''
+  ) {
+    const v = value as Record<string, unknown>;
+    return {
+      type: 'image',
+      url: v.url as string,
+      mimeType: v.mimeType as string,
+      storagePath: typeof v.storagePath === 'string' ? v.storagePath : undefined,
+    };
+  }
+  return undefined;
+}
+
 function normalizeMessage(
   id: string,
   raw: FirestoreChatMessage | null | undefined,
@@ -125,6 +161,9 @@ function normalizeMessage(
     createdAt: toIsoString(raw?.createdAt, createdAtMs),
     createdAtMs,
     model: typeof raw?.model === 'string' ? (raw.model as ModelType) : undefined,
+    attachment: normalizeAttachment(raw?.attachment),
+    resultType: isValidResultType(raw?.resultType) ? raw.resultType : undefined,
+    processedImageData: typeof raw?.processedImageData === 'string' ? raw.processedImageData : undefined,
   };
 }
 
@@ -188,20 +227,35 @@ export async function addChatMessage(
   const messageRef = doc(getMessagesRef(uid));
   const createdAtMs = message.createdAtMs ?? Date.now();
 
+  const data: Record<string, unknown> = {
+    role: message.role,
+    content: message.content,
+    status: message.status,
+    model: message.model ?? null,
+    createdAt: serverTimestamp(),
+    createdAtMs,
+  };
+
+  if (message.attachment) {
+    data.attachment = {
+      type: message.attachment.type,
+      url: message.attachment.url,
+      mimeType: message.attachment.mimeType,
+      storagePath: message.attachment.storagePath ?? null,
+    };
+  }
+
+  if (message.resultType) {
+    data.resultType = message.resultType;
+  }
+
+  if (message.processedImageData) {
+    data.processedImageData = message.processedImageData;
+  }
+
   const batch = writeBatch(db);
 
-  batch.set(
-    messageRef,
-    {
-      role: message.role,
-      content: message.content,
-      status: message.status,
-      model: message.model ?? null,
-      createdAt: serverTimestamp(),
-      createdAtMs,
-    },
-    { merge: true }
-  );
+  batch.set(messageRef, data, { merge: true });
 
   batch.set(
     getChatRef(uid),

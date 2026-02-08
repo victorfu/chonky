@@ -117,13 +117,11 @@
     "actions": "動作",
     "navigation": "導覽",
     "goToChat": "前往對話首頁",
-    "goToAnalyze": "前往分析",
     "goToSettings": "前往設定",
     "noResults": "找不到結果"
   },
   "nav": {
     "chat": "對話",
-    "analyze": "分析",
     "settings": "設定"
   },
   "chatHome": {
@@ -155,44 +153,15 @@
       "hintEnter": "按 Enter 送出，Shift+Enter 換行。",
       "hintClick": "請按送出按鈕傳送訊息。",
       "send": "送出"
+    },
+    "imageAttachment": {
+      "placeholder": "詢問關於這張圖片的任何問題...",
+      "attachImage": "附加圖片",
+      "attached": "已附加圖片",
+      "removeAttachment": "移除"
     }
   },
   "screenshot": {
-    "title": "圖片分析",
-    "subtitle": "AI 智慧圖片解析",
-    "heroTitle": "探索你的截圖",
-    "heroSubtitle": "上傳截圖、選模式，準備分析再繼續",
-    "signInCta": "登入",
-    "signInHint": "完成驗證後會回到此頁",
-    "loginRequired": "分析前會進行驗證",
-    "signInToAnalyze": "開始分析",
-    "steps": {
-      "upload": {
-        "title": "放入圖片",
-        "description": "貼上、拖曳或選擇檔案預覽。"
-      },
-      "choose": {
-        "title": "選擇模式",
-        "description": "可選解釋、文字辨識、翻譯或去背。"
-      },
-      "analyze": {
-        "title": "開始分析",
-        "description": "準備好就開始分析。"
-      }
-    },
-    "analyze": "開始分析",
-    "analyzing": "分析中...",
-    "clear": "清除",
-    "result": "分析結果",
-    "reanalyze": "重新分析",
-    "analysisMode": "分析模式",
-    "dropzone": {
-      "title": "拖放圖片至此",
-      "subtitle": "或點擊下方按鈕上傳"
-    },
-    "pasteFromClipboard": "貼上圖片",
-    "selectFile": "選擇檔案",
-    "shortcut": "提示：可直接 Ctrl+V 貼上",
     "modes": {
       "explain": "解釋",
       "explainDesc": "通用圖片內容解釋",
@@ -204,14 +173,9 @@
       "removeBgDesc": "移除圖片背景"
     },
     "errors": {
-      "invalidFileType": "請選擇圖片檔案",
-      "readError": "讀取檔案失敗",
-      "clipboardError": "無法讀取剪貼簿",
-      "noImageInClipboard": "剪貼簿中找不到圖片",
       "imagePipelineLoadFailed": "影像模型載入失敗，請稍後再試。",
       "imagePipelineInferenceFailed": "影像處理失敗，請換一張圖片再試。",
       "backgroundRemovalFailed": "去背景失敗，請嘗試更清晰的主體圖片。",
-      "storageFailed": "無法在本地儲存圖片，離開頁面後可能會遺失。",
       "analysisFailed": "截圖分析失敗，請再試一次。"
     },
     "prompts": {

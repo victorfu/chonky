@@ -11,9 +11,6 @@ import { useSettingsStore } from '@/stores/useSettingsStore';
 const LazyLoginPage = lazy(() =>
   import('@/components/auth/LoginPage').then((m) => ({ default: m.LoginPage }))
 );
-const LazyScreenshotPage = lazy(() =>
-  import('@/components/screenshots/ScreenshotPage').then((m) => ({ default: m.ScreenshotPage }))
-);
 const LazySettingsPage = lazy(() =>
   import('@/components/settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))
 );
@@ -60,7 +57,7 @@ function App() {
           <Route element={<MainLayout />}>
             {/* Homepage (public) */}
             <Route index element={<ChatHomePage />} />
-            <Route path="analyze" element={<Suspense fallback={<RouteFallback />}><LazyScreenshotPage /></Suspense>} />
+            <Route path="analyze" element={<Navigate to="/" replace />} />
 
             {/* Protected routes */}
             <Route

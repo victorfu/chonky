@@ -117,13 +117,11 @@
     "actions": "Actions",
     "navigation": "Navigation",
     "goToChat": "Go to Chat",
-    "goToAnalyze": "Go to Analyze",
     "goToSettings": "Go to Settings",
     "noResults": "No results found"
   },
   "nav": {
     "chat": "Chat",
-    "analyze": "Analyze",
     "settings": "Settings"
   },
   "chatHome": {
@@ -155,44 +153,15 @@
       "hintEnter": "Press Enter to send, Shift+Enter for a new line.",
       "hintClick": "Use the send button to submit your message.",
       "send": "Send"
+    },
+    "imageAttachment": {
+      "placeholder": "Ask anything about this image...",
+      "attachImage": "Attach image",
+      "attached": "Image attached",
+      "removeAttachment": "Remove"
     }
   },
   "screenshot": {
-    "title": "Image Analysis",
-    "subtitle": "AI-powered image analysis",
-    "heroTitle": "Explore your screenshots",
-    "heroSubtitle": "Upload a screenshot, pick a mode, continue when you're ready to analyze.",
-    "signInCta": "Sign in",
-    "signInHint": "You'll return here after verification.",
-    "loginRequired": "Verification required to run analysis.",
-    "signInToAnalyze": "Analyze",
-    "steps": {
-      "upload": {
-        "title": "Drop an image",
-        "description": "Paste, drag, or choose a file to preview."
-      },
-      "choose": {
-        "title": "Pick a mode",
-        "description": "Choose explain, OCR, translate, or cleanup."
-      },
-      "analyze": {
-        "title": "Run analysis",
-        "description": "When you're ready, start the analysis."
-      }
-    },
-    "analyze": "Analyze",
-    "analyzing": "Analyzing...",
-    "clear": "Clear",
-    "result": "Analysis Result",
-    "reanalyze": "Reanalyze",
-    "analysisMode": "Analysis Mode",
-    "dropzone": {
-      "title": "Drop image here",
-      "subtitle": "or click the buttons below"
-    },
-    "pasteFromClipboard": "Paste Image",
-    "selectFile": "Select File",
-    "shortcut": "Tip: Press Ctrl+V to paste",
     "modes": {
       "explain": "Explain",
       "explainDesc": "General explanation of the image content",
@@ -204,14 +173,9 @@
       "removeBgDesc": "Remove image background"
     },
     "errors": {
-      "invalidFileType": "Please select an image file",
-      "readError": "Failed to read file",
-      "clipboardError": "Failed to read from clipboard",
-      "noImageInClipboard": "No image found in clipboard",
       "imagePipelineLoadFailed": "Failed to load image processing model. Please try again shortly.",
       "imagePipelineInferenceFailed": "Image processing failed. Please try another image.",
       "backgroundRemovalFailed": "Background removal failed. Try an image with a clearer subject.",
-      "storageFailed": "Could not save image locally. Your work may not persist if you navigate away.",
       "analysisFailed": "Failed to analyze screenshot. Please try again."
     },
     "prompts": {

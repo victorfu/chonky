@@ -30,4 +30,4 @@ export type { AnalysisMode, AnalysisResultType, ScreenshotAnalysis, AnalysisMode
 export { ANALYSIS_MODES, ANALYSIS_MODE_CONFIGS } from './screenshot';
 
 // Chat types
-export type { ChatRole, ChatMessageStatus, ChatMessage, ChatThreadMeta } from './chat';
+export type { ChatRole, ChatMessageStatus, ChatMessage, ChatMessageAttachment, ChatThreadMeta } from './chat';

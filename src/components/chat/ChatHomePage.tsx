@@ -1,8 +1,11 @@
 import { MessageSquareText, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import type { AnalysisMode } from '@/types/screenshot';
+import type { ChatMessageAttachment } from '@/types';
 import { ChatComposer } from './ChatComposer';
 import { ChatMessageList } from './ChatMessageList';
+import { ChatQuickActions } from './ChatQuickActions';
 import { ChatStarterPrompts } from './ChatStarterPrompts';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -18,26 +21,56 @@ export function ChatHomePage() {
 
   const messages = useChatStore((s) => s.messages);
   const draftInput = useChatStore((s) => s.draftInput);
+  const draftAttachment = useChatStore((s) => s.draftAttachment);
+  const streamingContent = useChatStore((s) => s.streamingContent);
   const isInitializing = useChatStore((s) => s.isInitializing);
   const isSending = useChatStore((s) => s.isSending);
   const error = useChatStore((s) => s.error);
   const setDraftInput = useChatStore((s) => s.setDraftInput);
+  const setDraftAttachment = useChatStore((s) => s.setDraftAttachment);
   const sendMessage = useChatStore((s) => s.sendMessage);
+  const sendMessageWithImage = useChatStore((s) => s.sendMessageWithImage);
   const clearConversation = useChatStore((s) => s.clearConversation);
+
+  const redirectToLogin = () => {
+    navigate('/login', {
+      state: { from: location, pendingChat: true },
+    });
+  };
 
   const handleSend = async (content: string) => {
     try {
-      await sendMessage(content);
+      if (draftAttachment) {
+        // If image attached but no text, default to "explain" mode
+        const mode: AnalysisMode | undefined = content ? undefined : 'explain';
+        await sendMessageWithImage(content, draftAttachment, mode);
+      } else {
+        await sendMessage(content);
+      }
     } catch (sendError) {
       if (isAuthRequiredError(sendError)) {
-        navigate('/login', {
-          state: {
-            from: location,
-            pendingChat: true,
-          },
-        });
+        redirectToLogin();
       }
     }
+  };
+
+  const handleQuickAction = async (mode: AnalysisMode) => {
+    if (!draftAttachment) return;
+    try {
+      await sendMessageWithImage('', draftAttachment, mode);
+    } catch (sendError) {
+      if (isAuthRequiredError(sendError)) {
+        redirectToLogin();
+      }
+    }
+  };
+
+  const handleAttach = (attachment: ChatMessageAttachment) => {
+    setDraftAttachment(attachment);
+  };
+
+  const handleRemoveAttachment = () => {
+    setDraftAttachment(null);
   };
 
   const handleClearConversation = async () => {
@@ -47,6 +80,8 @@ export function ChatHomePage() {
       // Error state is already handled in the store.
     }
   };
+
+  const showQuickActions = !!draftAttachment && !draftInput.trim();
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -102,19 +137,31 @@ export function ChatHomePage() {
                 messages={messages}
                 isSending={isSending}
                 isInitializing={isInitializing}
+                streamingContent={streamingContent}
               />
             )}
           </div>
 
           <div className="border-t border-base-300 px-4 py-4 sm:px-6 sm:py-5">
-            <ChatComposer
-              value={draftInput}
-              onChange={setDraftInput}
-              onSubmit={handleSend}
-              isSending={isSending}
-              disabled={isInitializing}
-              sendWithEnter={sendWithEnter}
-            />
+            <div className="space-y-3">
+              <ChatComposer
+                value={draftInput}
+                onChange={setDraftInput}
+                onSubmit={handleSend}
+                isSending={isSending}
+                disabled={isInitializing}
+                sendWithEnter={sendWithEnter}
+                attachment={draftAttachment}
+                onAttach={handleAttach}
+                onRemoveAttachment={handleRemoveAttachment}
+              />
+              {showQuickActions && (
+                <ChatQuickActions
+                  onQuickAction={handleQuickAction}
+                  disabled={isSending || isInitializing}
+                />
+              )}
+            </div>
             {!isAuthenticated && (
               <p className="mt-3 text-xs text-base-content/55">
                 {t(

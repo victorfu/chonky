@@ -1,19 +1,140 @@
 import { create } from 'zustand';
-import type { ChatMessage } from '@/types';
+import { createStore, del, get, set } from 'idb-keyval';
+import type { ChatMessage, ChatMessageAttachment } from '@/types';
+import type { AnalysisMode } from '@/types/screenshot';
 import {
   addChatMessage,
   clearChatMessages,
   ensureDefaultChat,
   subscribeChatMessages,
 } from '@/services/firestoreChat';
-import { generateAssistantReply } from '@/services/chatProvider';
+import { generateAssistantReply, streamImageReply } from '@/services/chatProvider';
+import { analyzeScreenshot, isImageMode } from '@/services/screenshotAnalysis';
+import { uploadChatImage } from '@/services/firebaseStorage';
 import { useAuthStore } from './useAuthStore';
 import { useSettingsStore } from './useSettingsStore';
 
 const PENDING_CHAT_MESSAGE_KEY = 'pending-chat-message';
 const AUTH_REQUIRED_ERROR_CODE = 'AUTH_REQUIRED';
+const pendingChatStore = createStore('chonky-chat', 'pending');
 
 type AuthRequiredError = Error & { code: typeof AUTH_REQUIRED_ERROR_CODE };
+type PendingChatMessage =
+  | { kind: 'text'; text: string }
+  | {
+      kind: 'image';
+      text: string;
+      attachment: ChatMessageAttachment;
+      mode?: AnalysisMode;
+    };
+
+function isAnalysisMode(value: unknown): value is AnalysisMode {
+  return value === 'explain' || value === 'ocr' || value === 'translate' || value === 'remove-bg';
+}
+
+function isChatMessageAttachment(value: unknown): value is ChatMessageAttachment {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    (value as Record<string, unknown>).type === 'image' &&
+    'url' in value &&
+    typeof (value as Record<string, unknown>).url === 'string' &&
+    (value as Record<string, unknown>).url !== '' &&
+    'mimeType' in value &&
+    typeof (value as Record<string, unknown>).mimeType === 'string' &&
+    (value as Record<string, unknown>).mimeType !== '' &&
+    (!('storagePath' in value) ||
+      (value as Record<string, unknown>).storagePath == null ||
+      typeof (value as Record<string, unknown>).storagePath === 'string')
+  );
+}
+
+function parsePendingMessage(raw: string): PendingChatMessage | null {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'kind' in parsed &&
+      (parsed as Record<string, unknown>).kind === 'text' &&
+      'text' in parsed &&
+      typeof (parsed as Record<string, unknown>).text === 'string'
+    ) {
+      const text = ((parsed as Record<string, unknown>).text as string).trim();
+      return text ? { kind: 'text', text } : null;
+    }
+
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'kind' in parsed &&
+      (parsed as Record<string, unknown>).kind === 'image' &&
+      'text' in parsed &&
+      typeof (parsed as Record<string, unknown>).text === 'string' &&
+      'attachment' in parsed &&
+      isChatMessageAttachment((parsed as Record<string, unknown>).attachment)
+    ) {
+      const modeValue = (parsed as Record<string, unknown>).mode;
+      const mode = isAnalysisMode(modeValue) ? modeValue : undefined;
+      return {
+        kind: 'image',
+        text: (parsed as Record<string, unknown>).text as string,
+        attachment: (parsed as Record<string, unknown>).attachment as ChatMessageAttachment,
+        mode,
+      };
+    }
+  } catch {
+    // Backward compatibility for previous plain-string pending payloads.
+  }
+
+  return { kind: 'text', text: trimmed };
+}
+
+function normalizePendingMessage(value: unknown): PendingChatMessage | null {
+  if (typeof value === 'string') {
+    return parsePendingMessage(value);
+  }
+
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'kind' in value &&
+    (value as Record<string, unknown>).kind === 'text' &&
+    'text' in value &&
+    typeof (value as Record<string, unknown>).text === 'string'
+  ) {
+    const text = ((value as Record<string, unknown>).text as string).trim();
+    return text ? { kind: 'text', text } : null;
+  }
+
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'kind' in value &&
+    (value as Record<string, unknown>).kind === 'image' &&
+    'text' in value &&
+    typeof (value as Record<string, unknown>).text === 'string' &&
+    'attachment' in value &&
+    isChatMessageAttachment((value as Record<string, unknown>).attachment)
+  ) {
+    const modeValue = (value as Record<string, unknown>).mode;
+    const mode = isAnalysisMode(modeValue) ? modeValue : undefined;
+    return {
+      kind: 'image',
+      text: (value as Record<string, unknown>).text as string,
+      attachment: (value as Record<string, unknown>).attachment as ChatMessageAttachment,
+      mode,
+    };
+  }
+
+  return null;
+}
 
 function createAuthRequiredError(): AuthRequiredError {
   const error = new Error('Authentication is required to send messages') as AuthRequiredError;
@@ -30,27 +151,48 @@ export function isAuthRequiredError(error: unknown): boolean {
   );
 }
 
-function loadPendingMessage(): string | null {
+async function loadPendingMessage(): Promise<PendingChatMessage | null> {
   try {
-    const message = sessionStorage.getItem(PENDING_CHAT_MESSAGE_KEY);
-    return message?.trim() ?? null;
+    const message = await get(PENDING_CHAT_MESSAGE_KEY, pendingChatStore);
+    return normalizePendingMessage(message);
   } catch (err) {
     console.error('[useChatStore] loadPendingMessage failed:', err);
     return null;
   }
 }
 
-function savePendingMessage(message: string): void {
+async function savePendingMessage(message: PendingChatMessage): Promise<void> {
   try {
-    sessionStorage.setItem(PENDING_CHAT_MESSAGE_KEY, message);
+    await set(PENDING_CHAT_MESSAGE_KEY, message, pendingChatStore);
   } catch (err) {
     console.error('[useChatStore] savePendingMessage failed:', err);
   }
 }
 
-function clearPendingMessage(): void {
+async function savePendingTextMessage(message: string): Promise<void> {
+  const text = message.trim();
+  if (!text) {
+    return;
+  }
+  await savePendingMessage({ kind: 'text', text });
+}
+
+async function savePendingImageMessage(
+  text: string,
+  attachment: ChatMessageAttachment,
+  mode?: AnalysisMode
+): Promise<void> {
+  await savePendingMessage({
+    kind: 'image',
+    text,
+    attachment,
+    mode,
+  });
+}
+
+async function clearPendingMessage(): Promise<void> {
   try {
-    sessionStorage.removeItem(PENDING_CHAT_MESSAGE_KEY);
+    await del(PENDING_CHAT_MESSAGE_KEY, pendingChatStore);
   } catch (err) {
     console.error('[useChatStore] clearPendingMessage failed:', err);
   }
@@ -78,13 +220,17 @@ function getChatSendErrorMessage(error: unknown): string {
 interface ChatStore {
   messages: ChatMessage[];
   draftInput: string;
+  draftAttachment: ChatMessageAttachment | null;
+  streamingContent: string;
   isInitializing: boolean;
   isSending: boolean;
   error: string | null;
 
   initialize: () => () => void;
   setDraftInput: (value: string) => void;
+  setDraftAttachment: (attachment: ChatMessageAttachment | null) => void;
   sendMessage: (text: string) => Promise<void>;
+  sendMessageWithImage: (text: string, attachment: ChatMessageAttachment, mode?: AnalysisMode) => Promise<void>;
   consumePendingMessageAndSend: () => Promise<void>;
   clearConversation: () => Promise<void>;
 }
@@ -97,6 +243,8 @@ export const useChatStore = create<ChatStore>((set, get) => {
   return {
     messages: [],
     draftInput: '',
+    draftAttachment: null,
+    streamingContent: '',
     isInitializing: false,
     isSending: false,
     error: null,
@@ -191,6 +339,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
       set({ draftInput: value });
     },
 
+    setDraftAttachment: (attachment) => {
+      set({ draftAttachment: attachment });
+    },
+
     sendMessage: async (text) => {
       const content = text.trim();
       if (!content) {
@@ -200,7 +352,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       const authUid = useAuthStore.getState().user?.id ?? null;
       const uid = activeUid ?? authUid;
       if (!authUid || !uid || uid !== authUid) {
-        savePendingMessage(content);
+        await savePendingTextMessage(content);
         throw createAuthRequiredError();
       }
 
@@ -301,18 +453,245 @@ export const useChatStore = create<ChatStore>((set, get) => {
       }
     },
 
+    sendMessageWithImage: async (text, attachment, mode) => {
+      const authUid = useAuthStore.getState().user?.id ?? null;
+      const uid = activeUid ?? authUid;
+      if (!authUid || !uid || uid !== authUid) {
+        await savePendingImageMessage(text, attachment, mode);
+        throw createAuthRequiredError();
+      }
+
+      const { language, defaultModel } = useSettingsStore.getState().settings.general;
+      const nowMs = Date.now();
+      const userTempId = `local-user-${nowMs}`;
+      let assistantTempId: string | null = null;
+
+      const content = text.trim() || (mode ? `[${mode}]` : '[image]');
+
+      set((state) => ({
+        draftInput: '',
+        draftAttachment: null,
+        isSending: true,
+        streamingContent: '',
+        error: null,
+        messages: [
+          ...state.messages,
+          {
+            id: userTempId,
+            role: 'user',
+            content,
+            status: 'pending',
+            createdAt: new Date(nowMs).toISOString(),
+            createdAtMs: nowMs,
+            model: defaultModel,
+            attachment,
+          },
+        ],
+      }));
+
+      try {
+        // Upload image to Firebase Storage
+        const { downloadUrl, storagePath } = await uploadChatImage(uid, userTempId, attachment.url);
+        const persistedAttachment: ChatMessageAttachment = {
+          type: 'image',
+          url: downloadUrl,
+          mimeType: attachment.mimeType,
+          storagePath,
+        };
+
+        // Update local message with storage URL
+        set((state) => ({
+          messages: state.messages.map((m) =>
+            m.id === userTempId ? { ...m, attachment: persistedAttachment } : m
+          ),
+        }));
+
+        // Persist user message to Firestore
+        const persistedUserMessageId = await addChatMessage(uid, {
+          role: 'user',
+          content,
+          status: 'sent',
+          model: defaultModel,
+          createdAtMs: nowMs,
+          attachment: persistedAttachment,
+        });
+
+        set((state) => ({
+          messages: state.messages.map((m) =>
+            m.id === userTempId
+              ? { ...m, id: persistedUserMessageId, status: 'sent' }
+              : m
+          ),
+        }));
+
+        // Handle remove-bg locally
+        if (mode && isImageMode(mode)) {
+          const dataUrlMatch = attachment.url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+          const mimeType = dataUrlMatch?.[1] ?? attachment.mimeType;
+          const base64Data = dataUrlMatch?.[2] ?? attachment.url;
+
+          const result = await analyzeScreenshot(base64Data, mode, defaultModel, language, undefined, mimeType);
+
+          const assistantMs = Date.now();
+          const nextAssistantTempId = `local-assistant-${assistantMs}`;
+          assistantTempId = nextAssistantTempId;
+
+          // Upload processed image to Storage if it's an image result
+          let processedImageUrl = result.processedImageData;
+          let processedStoragePath: string | undefined;
+          if (result.resultType === 'image' && result.processedImageData) {
+            const processedUpload = await uploadChatImage(uid, nextAssistantTempId, result.processedImageData);
+            processedImageUrl = processedUpload.downloadUrl;
+            processedStoragePath = processedUpload.storagePath;
+          }
+
+          const processedAttachment: ChatMessageAttachment | undefined =
+            result.resultType === 'image' && processedImageUrl
+              ? {
+                  type: 'image',
+                  url: processedImageUrl,
+                  mimeType: 'image/png',
+                  storagePath: processedStoragePath,
+                }
+              : undefined;
+
+          set((state) => ({
+            streamingContent: '',
+            messages: [
+              ...state.messages,
+              {
+                id: nextAssistantTempId,
+                role: 'assistant',
+                content: result.text,
+                status: 'pending',
+                createdAt: new Date(assistantMs).toISOString(),
+                createdAtMs: assistantMs,
+                model: defaultModel,
+                resultType: result.resultType,
+                processedImageData: processedImageUrl ?? undefined,
+                attachment: processedAttachment,
+              },
+            ],
+          }));
+
+          const persistedAssistantId = await addChatMessage(uid, {
+            role: 'assistant',
+            content: result.text,
+            status: 'sent',
+            model: defaultModel,
+            createdAtMs: assistantMs,
+            resultType: result.resultType,
+            processedImageData: processedImageUrl ?? undefined,
+            attachment: processedAttachment,
+          });
+
+          set((state) => ({
+            messages: state.messages.map((m) =>
+              m.id === nextAssistantTempId
+                ? { ...m, id: persistedAssistantId, status: 'sent' }
+                : m
+            ),
+          }));
+
+          return;
+        }
+
+        // Streaming text analysis for text modes / custom prompt
+        const dataUrlMatch = attachment.url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+        const mimeType = dataUrlMatch?.[1] ?? attachment.mimeType;
+        const base64Data = dataUrlMatch?.[2] ?? attachment.url;
+
+        const assistantMs = Date.now();
+        const nextAssistantTempId = `local-assistant-${assistantMs}`;
+        assistantTempId = nextAssistantTempId;
+
+        set((state) => ({
+          messages: [
+            ...state.messages,
+            {
+              id: nextAssistantTempId,
+              role: 'assistant',
+              content: '',
+              status: 'pending',
+              createdAt: new Date(assistantMs).toISOString(),
+              createdAtMs: assistantMs,
+              model: defaultModel,
+            },
+          ],
+        }));
+
+        const fullText = await streamImageReply(
+          base64Data,
+          mimeType,
+          { language, model: defaultModel },
+          (chunk) => {
+            set({ streamingContent: chunk });
+          },
+          text.trim() || undefined,
+          mode
+        );
+
+        set({ streamingContent: '' });
+
+        set((state) => ({
+          messages: state.messages.map((m) =>
+            m.id === nextAssistantTempId ? { ...m, content: fullText } : m
+          ),
+        }));
+
+        const persistedAssistantId = await addChatMessage(uid, {
+          role: 'assistant',
+          content: fullText,
+          status: 'sent',
+          model: defaultModel,
+          createdAtMs: assistantMs,
+        });
+
+        set((state) => ({
+          messages: state.messages.map((m) =>
+            m.id === nextAssistantTempId
+              ? { ...m, id: persistedAssistantId, status: 'sent' }
+              : m
+          ),
+        }));
+      } catch (error) {
+        console.error('Failed to send image message:', error);
+        set((state) => ({
+          streamingContent: '',
+          messages: state.messages.map((message) => {
+            if (message.id === userTempId || message.id === assistantTempId) {
+              return { ...message, status: 'error' };
+            }
+            return message;
+          }),
+          error: getChatSendErrorMessage(error),
+        }));
+        throw error;
+      } finally {
+        set({ isSending: false });
+      }
+    },
+
     consumePendingMessageAndSend: async () => {
-      const pendingMessage = loadPendingMessage();
+      const pendingMessage = await loadPendingMessage();
       if (!pendingMessage) {
         return;
       }
 
-      clearPendingMessage();
+      await clearPendingMessage();
 
       try {
-        await get().sendMessage(pendingMessage);
+        if (pendingMessage.kind === 'image') {
+          await get().sendMessageWithImage(
+            pendingMessage.text,
+            pendingMessage.attachment,
+            pendingMessage.mode
+          );
+        } else {
+          await get().sendMessage(pendingMessage.text);
+        }
       } catch (error) {
-        savePendingMessage(pendingMessage);
+        await savePendingMessage(pendingMessage);
         if (!isAuthRequiredError(error)) {
           console.error('[useChatStore] consumePendingMessageAndSend failed:', error);
         }

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   MessageSquareText,
-  Camera,
   Settings,
   Search,
 } from 'lucide-react';
@@ -39,14 +38,7 @@ export function CommandPalette() {
         action: () => navigate('/'),
         category: t('commandPalette.navigation'),
       },
-      {
-        id: 'nav-analyze',
-        title: t('commandPalette.goToAnalyze', 'Go to Analyze'),
-        icon: <Camera className="w-4 h-4" />,
-        action: () => navigate('/analyze'),
-        category: t('commandPalette.navigation'),
-      },
-      {
+{
         id: 'nav-settings',
         title: t('commandPalette.goToSettings'),
         icon: <Settings className="w-4 h-4" />,

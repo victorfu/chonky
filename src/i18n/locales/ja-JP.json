@@ -117,13 +117,11 @@
     "actions": "アクション",
     "navigation": "ナビゲーション",
     "goToChat": "チャットへ移動",
-    "goToAnalyze": "分析へ移動",
     "goToSettings": "設定へ移動",
     "noResults": "結果が見つかりません"
   },
   "nav": {
     "chat": "チャット",
-    "analyze": "分析",
     "settings": "設定"
   },
   "chatHome": {
@@ -155,44 +153,15 @@
       "hintEnter": "Enter で送信、Shift+Enter で改行。",
       "hintClick": "送信ボタンでメッセージを送信します。",
       "send": "送信"
+    },
+    "imageAttachment": {
+      "placeholder": "この画像について何でも聞いてください...",
+      "attachImage": "画像を添付",
+      "attached": "画像を添付済み",
+      "removeAttachment": "削除"
     }
   },
   "screenshot": {
-    "title": "画像分析",
-    "subtitle": "AIによる画像解析",
-    "heroTitle": "スクリーンショットを探索",
-    "heroSubtitle": "スクリーンショットをアップロードしてモードを選び、分析の準備ができたら続行。",
-    "signInCta": "ログイン",
-    "signInHint": "確認後にこのページへ戻ります。",
-    "loginRequired": "分析前に確認が必要です。",
-    "signInToAnalyze": "分析を開始",
-    "steps": {
-      "upload": {
-        "title": "画像を追加",
-        "description": "貼り付け、ドラッグ、またはファイル選択でプレビュー。"
-      },
-      "choose": {
-        "title": "モードを選ぶ",
-        "description": "説明、OCR、翻訳、背景除去から選択。"
-      },
-      "analyze": {
-        "title": "分析を実行",
-        "description": "準備ができたら分析を開始。"
-      }
-    },
-    "analyze": "分析する",
-    "analyzing": "分析中...",
-    "clear": "クリア",
-    "result": "分析結果",
-    "reanalyze": "再分析",
-    "analysisMode": "分析モード",
-    "dropzone": {
-      "title": "画像をドロップ",
-      "subtitle": "または下のボタンをクリック"
-    },
-    "pasteFromClipboard": "画像を貼り付け",
-    "selectFile": "ファイル選択",
-    "shortcut": "ヒント：Ctrl+Vで貼り付け可能",
     "modes": {
       "explain": "説明",
       "explainDesc": "画像内容の一般的な説明",
@@ -204,14 +173,9 @@
       "removeBgDesc": "画像の背景を除去"
     },
     "errors": {
-      "invalidFileType": "画像ファイルを選択してください",
-      "readError": "ファイルの読み取りに失敗しました",
-      "clipboardError": "クリップボードの読み取りに失敗しました",
-      "noImageInClipboard": "クリップボードに画像がありません",
       "imagePipelineLoadFailed": "画像処理モデルの読み込みに失敗しました。しばらくしてから再試行してください。",
       "imagePipelineInferenceFailed": "画像処理に失敗しました。別の画像で再試行してください。",
       "backgroundRemovalFailed": "背景除去に失敗しました。被写体がはっきりした画像をお試しください。",
-      "storageFailed": "画像をローカルに保存できませんでした。ページを離れるとデータが失われる可能性があります。",
       "analysisFailed": "スクリーンショットの分析に失敗しました。もう一度お試しください。"
     },
     "prompts": {
