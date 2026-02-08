@@ -1,16 +1,19 @@
 import type { ThemeMode } from '@/types';
 
 class ThemeService {
-  private mediaQuery: MediaQueryList;
+  private mediaQuery: MediaQueryList | null;
   private listeners: Set<(theme: 'light' | 'dark') => void>;
   private currentTheme: ThemeMode;
 
   constructor() {
-    this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (typeof window !== 'undefined') {
+      this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this.mediaQuery.addEventListener('change', this.handleSystemChange);
+    } else {
+      this.mediaQuery = null;
+    }
     this.listeners = new Set();
     this.currentTheme = 'light';
-
-    this.mediaQuery.addEventListener('change', this.handleSystemChange);
   }
 
   private handleSystemChange = (e: MediaQueryListEvent) => {
@@ -23,12 +26,13 @@ class ThemeService {
 
   getResolvedTheme(theme: ThemeMode): 'light' | 'dark' {
     if (theme === 'auto') {
-      return this.mediaQuery.matches ? 'dark' : 'light';
+      return this.mediaQuery?.matches ? 'dark' : 'light';
     }
     return theme;
   }
 
   applyTheme(resolvedTheme: 'light' | 'dark'): void {
+    if (typeof document === 'undefined') return;
     document.documentElement.setAttribute('data-theme', resolvedTheme);
     document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
 
