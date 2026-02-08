@@ -40,8 +40,9 @@ function revokeIfObjectUrl(url: string | null): void {
 async function warmupBackgroundRemovalModel() {
   try {
     await preloadBackgroundRemovalModel();
-  } catch {
-    // Ignore preload failures; analyze() will surface user-facing errors.
+  } catch (error) {
+    // Preload is best-effort; analyze() will surface user-facing errors.
+    console.warn('[useScreenshotStore] Background removal model warmup failed:', error);
   }
 }
 

@@ -55,7 +55,7 @@ export interface ScreenshotAnalysis {
   mode: AnalysisMode;
   result: string;
   resultType: AnalysisResultType;
-  processedImageData?: string;  // base64, for image result types
+  processedImageData?: string;  // Object URL (blob:), for image result types
   model: ModelType;
   createdAt: string;
 }

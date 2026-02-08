@@ -68,6 +68,7 @@ function createWorker(): Worker {
 
   worker.addEventListener('error', (event) => {
     const workerError = event.error ?? new Error(event.message || 'Background removal worker failed');
+    console.error('[removeBackground] Worker error:', workerError);
     rejectAllPendingRequests(workerError);
     worker.terminate();
     workerInstance = null;
@@ -97,6 +98,8 @@ function callWorker(
     const timeoutId = setTimeout(() => {
       if (!pendingRequests.has(id)) return;
       pendingRequests.delete(id);
+
+      console.error(`[removeBackground] Worker timed out after ${timeoutMs}ms for request ${id}`);
 
       if (workerInstance) {
         workerInstance.terminate();
@@ -162,6 +165,10 @@ export async function removeImageBackground(
     }
     if (response.kind !== 'remove-background') {
       throw new ImagePipelineError('BACKGROUND_REMOVAL_FAILED', 'Invalid background removal worker response');
+    }
+
+    if (!response.processedImageBuffer?.byteLength) {
+      throw new ImagePipelineError('BACKGROUND_REMOVAL_FAILED', 'Worker returned an empty image buffer');
     }
 
     const blob = new Blob([response.processedImageBuffer], { type: 'image/png' });

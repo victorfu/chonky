@@ -196,11 +196,16 @@ async function handleRequest(
 }
 
 self.addEventListener('message', (event: MessageEvent<RemoveBackgroundWorkerRequest>) => {
-  void handleRequest(event.data).then((response) => {
-    const transferables: Transferable[] = [];
-    if (response.ok && response.kind === 'remove-background') {
-      transferables.push(response.processedImageBuffer);
-    }
-    self.postMessage(response, { transfer: transferables });
-  });
+  const request = event.data;
+  void handleRequest(request)
+    .then((response) => {
+      const transferables: Transferable[] = [];
+      if (response.ok && response.kind === 'remove-background') {
+        transferables.push(response.processedImageBuffer);
+      }
+      self.postMessage(response, { transfer: transferables });
+    })
+    .catch((error) => {
+      self.postMessage(buildFailure(request, 'BACKGROUND_REMOVAL_FAILED', String(error)));
+    });
 });
