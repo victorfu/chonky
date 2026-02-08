@@ -6,13 +6,7 @@ import type { ModelType } from '@/types';
  * Options for AI generation
  */
 export interface GenerateOptions {
-  systemPrompt?: string;
   history?: Array<{ role: 'user' | 'model'; content: string }>;
-}
-
-interface SystemInstructionContent {
-  role: 'system';
-  parts: Array<{ text: string }>;
 }
 
 /**
@@ -20,17 +14,6 @@ interface SystemInstructionContent {
  */
 function getModel(modelId: ModelType) {
   return getGenerativeModel(ai, { model: modelId });
-}
-
-function buildSystemInstruction(systemPrompt?: string): SystemInstructionContent | undefined {
-  if (!systemPrompt?.trim()) {
-    return undefined;
-  }
-
-  return {
-    role: 'system',
-    parts: [{ text: systemPrompt.trim() }],
-  };
 }
 
 /**
@@ -44,7 +27,6 @@ export async function generateResponse(
 ): Promise<string> {
   try {
     const geminiModel = getModel(model);
-    const systemInstruction = buildSystemInstruction(options?.systemPrompt);
 
     // Build the chat history if provided
     const history = options?.history?.map((msg) => ({
@@ -52,25 +34,21 @@ export async function generateResponse(
       parts: [{ text: msg.content }],
     }));
 
-    // Start a chat session if we have history or system prompt
-    if (history?.length || options?.systemPrompt) {
-      const chat = geminiModel.startChat({
-        history: history ?? [],
-        ...(systemInstruction ? { systemInstruction } : {}),
-      });
-
+    // Start a chat session if we have history
+    if (history?.length) {
+      const chat = geminiModel.startChat({ history });
       const result = await chat.sendMessage(prompt);
-      const response = result.response;
-      return response.text();
+      return result.response.text();
     }
 
     // Simple generation without history
     const result = await geminiModel.generateContent(prompt);
-    const response = result.response;
-    return response.text();
+    return result.response.text();
   } catch (error) {
     console.error('Firebase AI generation error:', error);
-    throw new Error('Failed to generate AI response. Please try again.');
+    const wrapped = new Error('Failed to generate AI response. Please try again.');
+    (wrapped as unknown as Record<string, unknown>).cause = error;
+    throw wrapped;
   }
 }
 
@@ -86,7 +64,6 @@ export async function streamResponse(
 ): Promise<void> {
   try {
     const geminiModel = getModel(model);
-    const systemInstruction = buildSystemInstruction(options?.systemPrompt);
 
     // Build the chat history if provided
     const history = options?.history?.map((msg) => ({
@@ -96,20 +73,14 @@ export async function streamResponse(
 
     let result;
 
-    // Start a chat session if we have history or system prompt
-    if (history?.length || options?.systemPrompt) {
-      const chat = geminiModel.startChat({
-        history: history ?? [],
-        ...(systemInstruction ? { systemInstruction } : {}),
-      });
-
+    // Start a chat session if we have history
+    if (history?.length) {
+      const chat = geminiModel.startChat({ history });
       result = await chat.sendMessageStream(prompt);
     } else {
-      // Simple streaming generation without history
       result = await geminiModel.generateContentStream(prompt);
     }
 
-    // Stream the response
     for await (const chunk of result.stream) {
       const chunkText = chunk.text();
       if (chunkText) {
@@ -118,6 +89,8 @@ export async function streamResponse(
     }
   } catch (error) {
     console.error('Firebase AI streaming error:', error);
-    throw new Error('Failed to stream AI response. Please try again.');
+    const wrapped = new Error('Failed to stream AI response. Please try again.');
+    (wrapped as unknown as Record<string, unknown>).cause = error;
+    throw wrapped;
   }
 }

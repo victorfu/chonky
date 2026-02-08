@@ -38,7 +38,8 @@ function loadPendingMessage(): string | null {
   try {
     const message = sessionStorage.getItem(PENDING_CHAT_MESSAGE_KEY);
     return message?.trim() ?? null;
-  } catch {
+  } catch (err) {
+    console.error('[useChatStore] loadPendingMessage failed:', err);
     return null;
   }
 }
@@ -46,29 +47,33 @@ function loadPendingMessage(): string | null {
 function savePendingMessage(message: string): void {
   try {
     sessionStorage.setItem(PENDING_CHAT_MESSAGE_KEY, message);
-  } catch {
-    // Ignore storage errors.
+  } catch (err) {
+    console.error('[useChatStore] savePendingMessage failed:', err);
   }
 }
 
 function clearPendingMessage(): void {
   try {
     sessionStorage.removeItem(PENDING_CHAT_MESSAGE_KEY);
-  } catch {
-    // Ignore storage errors.
+  } catch (err) {
+    console.error('[useChatStore] clearPendingMessage failed:', err);
   }
 }
 
+function findErrorWithCode(error: unknown): { code: string } | null {
+  if (error && typeof error === 'object' && 'code' in error && typeof (error as Record<string, unknown>).code === 'string') {
+    return error as { code: string };
+  }
+  if (error instanceof Error && 'cause' in error) {
+    return findErrorWithCode((error as unknown as Record<string, unknown>).cause);
+  }
+  return null;
+}
+
 function getChatSendErrorMessage(error: unknown): string {
-  if (
-    error &&
-    typeof error === 'object' &&
-    'code' in error &&
-    typeof error.code === 'string'
-  ) {
-    if (error.code === 'permission-denied') {
-      return 'Firestore permission denied. Deploy/update rules for user_chats and ensure current user is authenticated.';
-    }
+  const target = findErrorWithCode(error);
+  if (target?.code === 'permission-denied') {
+    return 'Firestore permission denied. Deploy/update rules for user_chats and ensure current user is authenticated.';
   }
 
   return error instanceof Error ? error.message : 'Failed to send message';
@@ -121,6 +126,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         await ensureDefaultChat(uid);
       } catch (error) {
         console.error('Failed to ensure default chat thread:', error);
+        set({
+          error: 'Failed to initialize chat',
+          isInitializing: false,
+        });
+        return;
       }
 
       if (activeUid !== uid) {
@@ -147,6 +157,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       if (initialUid) {
         void get().consumePendingMessageAndSend();
       }
+    }).catch((err) => {
+      console.error('[useChatStore] bindUserChat (initial) failed:', err);
     });
 
     authStoreUnsubscribe?.();
@@ -159,6 +171,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           if (uid) {
             void get().consumePendingMessageAndSend();
           }
+        }).catch((err) => {
+          console.error('[useChatStore] bindUserChat (auth change) failed:', err);
         });
       }
     });
@@ -297,8 +311,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     try {
       await get().sendMessage(pendingMessage);
     } catch (error) {
-      if (isAuthRequiredError(error)) {
-        savePendingMessage(pendingMessage);
+      savePendingMessage(pendingMessage);
+      if (!isAuthRequiredError(error)) {
+        console.error('[useChatStore] consumePendingMessageAndSend failed:', error);
       }
     }
   },

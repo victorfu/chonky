@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useScreenshotStore } from '@/stores/useScreenshotStore';
@@ -45,9 +45,9 @@ export function ScreenshotPage() {
     analyze,
   } = useScreenshotStore();
 
-  const warnStorageFailed = () => {
+  const warnStorageFailed = useCallback(() => {
     warning(t('screenshot.errors.storageFailed', 'Could not save image locally. Your work may not persist if you navigate away.'), { duration: 6000 });
-  };
+  }, [warning, t]);
 
   const persistAnalysisSnapshot = async (pendingAnalyze: boolean) => {
     const ok = await savePendingAnalysis({
@@ -86,8 +86,8 @@ export function ScreenshotPage() {
   const handleClear = () => {
     // Prevent immediate draft restoration on the next render after manual clear.
     skipDraftRestoreRef.current = true;
-    saveDraftImage(null).catch((err) => {
-      console.error('[ScreenshotPage] Failed to clear draft image:', err);
+    void saveDraftImage(null).then((ok) => {
+      if (!ok) console.error('[ScreenshotPage] Failed to clear draft image from storage');
     });
     clearImage();
   };
@@ -116,7 +116,7 @@ export function ScreenshotPage() {
       console.error('[ScreenshotPage] Failed to restore draft:', err);
     });
     return () => { cancelled = true; };
-  }, [currentImage, setImage]);
+  }, [currentImage, setImage, warnStorageFailed]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -143,7 +143,11 @@ export function ScreenshotPage() {
         setModel(pending.model);
       }
 
-      await clearPendingAnalysis();
+      const cleared = await clearPendingAnalysis();
+      if (!cleared) {
+        console.warn('[ScreenshotPage] clearPendingAnalysis failed; skipping auto-analyze to avoid stale replay');
+        return;
+      }
 
       if (pending.pendingAnalyze && pending.image) {
         setTimeout(analyze, 0);
@@ -152,12 +156,12 @@ export function ScreenshotPage() {
       console.error('[ScreenshotPage] Failed to restore pending analysis:', err);
     });
     return () => { cancelled = true; };
-  }, [isAuthenticated, currentImage, analyze, setImage, setMode, setModel]);
+  }, [isAuthenticated, currentImage, analyze, setImage, setMode, setModel, warnStorageFailed]);
 
   useEffect(() => {
     if (!currentImage) {
-      saveDraftImage(null).catch((err) => {
-        console.error('[ScreenshotPage] Failed to clear draft image:', err);
+      void saveDraftImage(null).then((ok) => {
+        if (!ok) console.error('[ScreenshotPage] Failed to clear draft image from storage');
       });
     }
   }, [currentImage]);

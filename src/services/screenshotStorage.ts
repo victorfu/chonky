@@ -1,5 +1,6 @@
 import { get, set, del } from 'idb-keyval';
 import type { ModelType } from '@/types';
+import { SUPPORTED_MODELS } from '@/types';
 import type { AnalysisMode } from '@/types/screenshot';
 import { ANALYSIS_MODES } from '@/types/screenshot';
 
@@ -66,7 +67,9 @@ export async function savePendingAnalysis(payload: PendingAnalysis): Promise<boo
       sessionStorage.setItem(SS_PENDING_META_KEY, JSON.stringify(meta));
     } catch (metaErr) {
       // Rollback the IDB write to avoid orphaned data
-      await del(IDB_PENDING_IMAGE_KEY).catch(() => {});
+      await del(IDB_PENDING_IMAGE_KEY).catch((rollbackErr) => {
+        console.error('[screenshotStorage] savePendingAnalysis rollback failed — orphaned IDB entry may remain:', rollbackErr);
+      });
       throw metaErr;
     }
     return true;
@@ -83,6 +86,7 @@ function isValidPendingMeta(value: unknown): value is PendingAnalysisMeta {
     typeof obj.mode === 'string' &&
     (ANALYSIS_MODES as readonly string[]).includes(obj.mode) &&
     typeof obj.model === 'string' &&
+    (SUPPORTED_MODELS as readonly string[]).includes(obj.model) &&
     typeof obj.pendingAnalyze === 'boolean'
   );
 }
@@ -126,6 +130,9 @@ export async function clearPendingAnalysis(): Promise<boolean> {
 
 // ── Migration ─────────────────────────────────────────────────
 
+// Intentionally discards old sessionStorage drafts rather than migrating them to IDB.
+// The old keys stored full base64 images which may be stale or oversized. A clean
+// break avoids complexity and the one-time data loss is acceptable for this upgrade.
 export function migrateLegacyKeys(): void {
   try {
     sessionStorage.removeItem(LEGACY_PENDING_KEY);
