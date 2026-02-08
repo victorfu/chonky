@@ -28,22 +28,15 @@ export function ScreenshotPage() {
   const skipDraftRestoreRef = useRef(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const {
-    currentImage,
-    analysisResult,
-    streamingResult,
-    isAnalyzing,
-    selectedMode,
-    selectedModel,
-    error,
-    resultType,
-    processedImageData,
-    setImage,
-    clearImage,
-    setMode,
-    setModel,
-    analyze,
-  } = useScreenshotStore();
+  const currentImage = useScreenshotStore((state) => state.currentImage);
+  const isAnalyzing = useScreenshotStore((state) => state.isAnalyzing);
+  const selectedMode = useScreenshotStore((state) => state.selectedMode);
+  const selectedModel = useScreenshotStore((state) => state.selectedModel);
+  const setImage = useScreenshotStore((state) => state.setImage);
+  const clearImage = useScreenshotStore((state) => state.clearImage);
+  const setMode = useScreenshotStore((state) => state.setMode);
+  const setModel = useScreenshotStore((state) => state.setModel);
+  const analyze = useScreenshotStore((state) => state.analyze);
 
   const warnStorageFailed = useCallback(() => {
     warning(t('screenshot.errors.storageFailed', 'Could not save image locally. Your work may not persist if you navigate away.'), { duration: 6000 });
@@ -279,15 +272,7 @@ export function ScreenshotPage() {
         )}
 
         {/* Result */}
-        <AnalysisResult
-          result={analysisResult}
-          streamingResult={streamingResult}
-          isAnalyzing={isAnalyzing}
-          error={error}
-          onReanalyze={handleAnalyze}
-          resultType={resultType}
-          processedImageData={processedImageData ?? undefined}
-        />
+        <AnalysisResult onReanalyze={handleAnalyze} />
       </div>
     </div>
   );

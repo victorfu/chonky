@@ -5,37 +5,36 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { IconButton } from '@/components/ui/IconButton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import type { AnalysisResultType } from '@/types/screenshot';
+import { useToast } from '@/hooks/useToast';
+import { useScreenshotStore } from '@/stores/useScreenshotStore';
 
 interface AnalysisResultProps {
-  result: string;
-  streamingResult: string;
-  isAnalyzing: boolean;
-  error: string | null;
   onReanalyze: () => void;
-  resultType?: AnalysisResultType;
-  processedImageData?: string;
 }
 
-export function AnalysisResult({
-  result,
-  streamingResult,
-  isAnalyzing,
-  error,
-  onReanalyze,
-  resultType = 'text',
-  processedImageData,
-}: AnalysisResultProps) {
+export function AnalysisResult({ onReanalyze }: AnalysisResultProps) {
   const { t } = useTranslation();
+  const { error: toastError } = useToast();
   const [copied, setCopied] = useState(false);
+  const analysisResult = useScreenshotStore((state) => state.analysisResult);
+  const streamingResult = useScreenshotStore((state) => state.streamingResult);
+  const isAnalyzing = useScreenshotStore((state) => state.isAnalyzing);
+  const error = useScreenshotStore((state) => state.error);
+  const resultType = useScreenshotStore((state) => state.resultType);
+  const processedImageData = useScreenshotStore((state) => state.processedImageData);
 
-  const displayContent = streamingResult || result;
+  const displayContent = streamingResult || analysisResult;
   const isImageResult = resultType === 'image';
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(displayContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(displayContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('[AnalysisResult] clipboard.writeText failed:', err);
+      toastError(t('common.copyFailed', 'Failed to copy'));
+    }
   };
 
   const handleDownload = () => {
