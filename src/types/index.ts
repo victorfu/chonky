@@ -27,3 +27,6 @@ export type { ApiResponse, ApiError } from './api';
 // Screenshot types
 export type { AnalysisMode, AnalysisResultType, ScreenshotAnalysis, AnalysisModeConfig } from './screenshot';
 export { ANALYSIS_MODES, ANALYSIS_MODE_CONFIGS } from './screenshot';
+
+// Chat types
+export type { ChatRole, ChatMessageStatus, ChatMessage, ChatThreadMeta } from './chat';

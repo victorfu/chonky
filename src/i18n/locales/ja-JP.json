@@ -116,13 +116,50 @@
     "placeholder": "コマンドを検索...",
     "actions": "アクション",
     "navigation": "ナビゲーション",
-    "goToAnalyze": "ホームへ移動",
+    "goToChat": "チャットへ移動",
+    "goToAnalyze": "分析へ移動",
     "goToSettings": "設定へ移動",
     "noResults": "結果が見つかりません"
   },
   "nav": {
-    "analyze": "ホーム",
+    "chat": "チャット",
+    "analyze": "分析",
     "settings": "設定"
+  },
+  "chatHome": {
+    "heroTitle": "チャット中心のワークスペース",
+    "heroSubtitle": "対話で要件整理、実装計画、リスク確認を進められます。画像分析は補助フローとして利用できます。",
+    "openAnalyze": "分析ページへ",
+    "signIn": "ログイン",
+    "threadLabel": "会話",
+    "threadHint": "ログイン中のデバイス間でメッセージがリアルタイム同期されます。",
+    "clearConversation": "クリア",
+    "emptyTitle": "新しい会話を開始",
+    "emptySubtitle": "計画、実装案、レビュー観点などを相談できます。",
+    "authHint": "入力は先に可能です。送信時のみログインが必要です。",
+    "loading": "会話を読み込み中...",
+    "errorPrefix": "エラー",
+    "roles": {
+      "user": "あなた",
+      "assistant": "アシスタント"
+    },
+    "status": {
+      "pending": "送信中...",
+      "error": "失敗"
+    },
+    "starters": {
+      "title": "スタータープロンプト",
+      "prompt1": "この要件を実行可能なステップに分解して",
+      "prompt2": "簡潔な実装計画を作成して",
+      "prompt3": "この方針のリスクと抜け漏れをレビューして",
+      "prompt4": "このモジュールの保守しやすい設計案を提案して"
+    },
+    "composer": {
+      "placeholder": "質問やタスクを入力してください...",
+      "hintEnter": "Enter で送信、Shift+Enter で改行。",
+      "hintClick": "送信ボタンでメッセージを送信します。",
+      "send": "送信"
+    }
   },
   "screenshot": {
     "title": "画像分析",

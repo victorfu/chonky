@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  MessageSquareText,
   Camera,
   Settings,
   Search,
@@ -32,10 +33,17 @@ export function CommandPalette() {
   const commands: CommandItem[] = useMemo(
     () => [
       {
-        id: 'nav-analyze',
-        title: t('commandPalette.goToAnalyze', 'Go to Home'),
-        icon: <Camera className="w-4 h-4" />,
+        id: 'nav-chat',
+        title: t('commandPalette.goToChat', 'Go to Chat'),
+        icon: <MessageSquareText className="w-4 h-4" />,
         action: () => navigate('/'),
+        category: t('commandPalette.navigation'),
+      },
+      {
+        id: 'nav-analyze',
+        title: t('commandPalette.goToAnalyze', 'Go to Analyze'),
+        icon: <Camera className="w-4 h-4" />,
+        action: () => navigate('/analyze'),
         category: t('commandPalette.navigation'),
       },
       {

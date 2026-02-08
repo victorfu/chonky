@@ -116,13 +116,50 @@
     "placeholder": "搜尋指令...",
     "actions": "動作",
     "navigation": "導覽",
-    "goToAnalyze": "前往首頁",
+    "goToChat": "前往對話首頁",
+    "goToAnalyze": "前往分析",
     "goToSettings": "前往設定",
     "noResults": "找不到結果"
   },
   "nav": {
-    "analyze": "首頁",
+    "chat": "對話",
+    "analyze": "分析",
     "settings": "設定"
+  },
+  "chatHome": {
+    "heroTitle": "對話式工作入口",
+    "heroSubtitle": "用對話快速整理需求、規劃實作、檢查風險。若需要圖片流程，仍可切換到分析頁。",
+    "openAnalyze": "前往分析頁",
+    "signIn": "登入",
+    "threadLabel": "對話",
+    "threadHint": "登入後訊息會在你的裝置之間即時同步。",
+    "clearConversation": "清空",
+    "emptyTitle": "開始新的對話",
+    "emptySubtitle": "你可以先問規劃、實作建議、或程式碼審查方向。",
+    "authHint": "你可以先輸入內容；送出時才需要登入。",
+    "loading": "載入對話中...",
+    "errorPrefix": "錯誤",
+    "roles": {
+      "user": "你",
+      "assistant": "助手"
+    },
+    "status": {
+      "pending": "傳送中...",
+      "error": "傳送失敗"
+    },
+    "starters": {
+      "title": "快速開始",
+      "prompt1": "幫我把這個需求拆成可執行步驟",
+      "prompt2": "請用精簡格式寫一份實作計畫",
+      "prompt3": "幫我檢查這個方案的風險與盲點",
+      "prompt4": "針對這個模組提出可維護的架構建議"
+    },
+    "composer": {
+      "placeholder": "輸入你的問題或任務...",
+      "hintEnter": "按 Enter 送出，Shift+Enter 換行。",
+      "hintClick": "請按送出按鈕傳送訊息。",
+      "send": "送出"
+    }
   },
   "screenshot": {
     "title": "圖片分析",

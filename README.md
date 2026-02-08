@@ -72,7 +72,7 @@ Common optional settings:
 - `VITE_FIREBASE_DATABASE_URL`
 - `VITE_FIREBASE_FIRESTORE_DATABASE_NAME`
 
-Note: `.env.example` includes `VITE_API_BASE_URL` and `VITE_ENABLE_MOCK`, but the current app does not read them.
+`VITE_API_BASE_URL` is used by the Vite dev server proxy (`vite.config.ts`).
 
 ### Firestore Rules
 

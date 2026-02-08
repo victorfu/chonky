@@ -4,25 +4,30 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { LoginPage } from '@/components/auth/LoginPage';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ScreenshotPage } from '@/components/screenshots/ScreenshotPage';
+import { ChatHomePage } from '@/components/chat/ChatHomePage';
 import { SettingsPage } from '@/components/settings/SettingsPage';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useChatStore } from '@/stores/useChatStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const initAuth = useAuthStore((state) => state.initialize);
+  const initChat = useChatStore((state) => state.initialize);
   const initSettings = useSettingsStore((state) => state.initialize);
 
   useEffect(() => {
     // Initialize Firebase Auth (returns unsubscribe function)
     const unsubscribeAuth = initAuth();
+    const unsubscribeChat = initChat();
     const unsubscribeSettings = initSettings();
 
     // Cleanup: unsubscribe listeners on unmount
     return () => {
       unsubscribeAuth();
+      unsubscribeChat();
       unsubscribeSettings();
     };
-  }, [initAuth, initSettings]);
+  }, [initAuth, initChat, initSettings]);
 
   return <>{children}</>;
 }
@@ -38,8 +43,8 @@ function App() {
           {/* App routes */}
           <Route element={<MainLayout />}>
             {/* Homepage (public) */}
-            <Route index element={<ScreenshotPage />} />
-            <Route path="analyze" element={<Navigate to="/" replace />} />
+            <Route index element={<ChatHomePage />} />
+            <Route path="analyze" element={<ScreenshotPage />} />
 
             {/* Protected routes */}
             <Route

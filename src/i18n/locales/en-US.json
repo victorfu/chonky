@@ -116,13 +116,50 @@
     "placeholder": "Search commands...",
     "actions": "Actions",
     "navigation": "Navigation",
-    "goToAnalyze": "Go to Home",
+    "goToChat": "Go to Chat",
+    "goToAnalyze": "Go to Analyze",
     "goToSettings": "Go to Settings",
     "noResults": "No results found"
   },
   "nav": {
-    "analyze": "Home",
+    "chat": "Chat",
+    "analyze": "Analyze",
     "settings": "Settings"
+  },
+  "chatHome": {
+    "heroTitle": "Chat-first Workspace",
+    "heroSubtitle": "Use conversation to clarify scope, plan execution, and review risks. Screenshot analysis remains available as a secondary flow.",
+    "openAnalyze": "Open Analyze",
+    "signIn": "Sign in",
+    "threadLabel": "Conversation",
+    "threadHint": "Messages sync in real time across your signed-in devices.",
+    "clearConversation": "Clear",
+    "emptyTitle": "Start a new conversation",
+    "emptySubtitle": "Ask for planning help, implementation ideas, or review guidance.",
+    "authHint": "You can draft now. Sign-in is only required when you send.",
+    "loading": "Loading conversation...",
+    "errorPrefix": "Error",
+    "roles": {
+      "user": "You",
+      "assistant": "Assistant"
+    },
+    "status": {
+      "pending": "Sending...",
+      "error": "Failed"
+    },
+    "starters": {
+      "title": "Starter prompts",
+      "prompt1": "Break this requirement into executable steps",
+      "prompt2": "Write a concise implementation plan",
+      "prompt3": "Review this approach and list key risks",
+      "prompt4": "Propose a maintainable architecture for this module"
+    },
+    "composer": {
+      "placeholder": "Ask anything about your work...",
+      "hintEnter": "Press Enter to send, Shift+Enter for a new line.",
+      "hintClick": "Use the send button to submit your message.",
+      "send": "Send"
+    }
   },
   "screenshot": {
     "title": "Image Analysis",
