@@ -16,16 +16,14 @@ export function ChatHomePage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const sendWithEnter = useSettingsStore((state) => state.settings.chat.sendWithEnter);
 
-  const {
-    messages,
-    draftInput,
-    isInitializing,
-    isSending,
-    error,
-    setDraftInput,
-    sendMessage,
-    clearConversation,
-  } = useChatStore();
+  const messages = useChatStore((s) => s.messages);
+  const draftInput = useChatStore((s) => s.draftInput);
+  const isInitializing = useChatStore((s) => s.isInitializing);
+  const isSending = useChatStore((s) => s.isSending);
+  const error = useChatStore((s) => s.error);
+  const setDraftInput = useChatStore((s) => s.setDraftInput);
+  const sendMessage = useChatStore((s) => s.sendMessage);
+  const clearConversation = useChatStore((s) => s.clearConversation);
 
   const handleSend = async (content: string) => {
     try {

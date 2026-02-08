@@ -41,7 +41,7 @@ export function AnalysisResult({ onReanalyze }: AnalysisResultProps) {
     if (!processedImageData) return;
 
     const link = document.createElement('a');
-    link.href = `data:image/png;base64,${processedImageData}`;
+    link.href = processedImageData;
     link.download = `processed-image-${Date.now()}.png`;
     document.body.appendChild(link);
     link.click();
@@ -114,7 +114,7 @@ export function AnalysisResult({ onReanalyze }: AnalysisResultProps) {
               }}
             />
             <img
-              src={`data:image/png;base64,${processedImageData}`}
+              src={processedImageData}
               alt="Processed result"
               className="relative max-w-full max-h-96 rounded-lg"
             />

@@ -31,6 +31,12 @@ function isValidMode(mode: string): mode is AnalysisMode {
   return (ANALYSIS_MODES as readonly string[]).includes(mode);
 }
 
+function revokeIfObjectUrl(url: string | null): void {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function warmupBackgroundRemovalModel() {
   try {
     await preloadBackgroundRemovalModel();
@@ -52,6 +58,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
 
   setImage: (base64) => {
     const mode = get().selectedMode;
+    revokeIfObjectUrl(get().processedImageData);
     set({
       currentImage: base64,
       analysisResult: '',
@@ -67,6 +74,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
   },
 
   clearImage: () => {
+    revokeIfObjectUrl(get().processedImageData);
     set({
       currentImage: null,
       analysisResult: '',
@@ -103,6 +111,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
       return;
     }
 
+    revokeIfObjectUrl(get().processedImageData);
     set({
       isAnalyzing: true,
       analysisResult: '',
@@ -128,6 +137,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
         mimeType
       );
 
+      revokeIfObjectUrl(get().processedImageData);
       set({
         analysisResult: result.text,
         streamingResult: '',
@@ -142,6 +152,7 @@ export const useScreenshotStore = create<ScreenshotStore>((set, get) => ({
   },
 
   clearResult: () => {
+    revokeIfObjectUrl(get().processedImageData);
     set({
       analysisResult: '',
       streamingResult: '',

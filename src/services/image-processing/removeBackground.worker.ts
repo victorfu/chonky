@@ -110,24 +110,6 @@ async function decodeInputBlob(imageBase64: string, mimeType: string): Promise<B
   return res.blob();
 }
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  let binary = '';
-
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
-    binary += String.fromCharCode(...chunk);
-  }
-
-  return btoa(binary);
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  const arrayBuffer = await blob.arrayBuffer();
-  return arrayBufferToBase64(arrayBuffer);
-}
-
 function buildFailure(
   request: RemoveBackgroundWorkerRequest,
   code: ImagePipelineErrorCode,
@@ -176,7 +158,7 @@ async function processBackgroundRemoval(
       id: request.id,
       ok: true,
       kind: 'remove-background',
-      processedImageBase64: await blobToBase64(finalBlob),
+      processedImageBuffer: await finalBlob.arrayBuffer(),
       inferenceSize,
       durationMs: Math.round(performance.now() - start),
     };
@@ -215,6 +197,10 @@ async function handleRequest(
 
 self.addEventListener('message', (event: MessageEvent<RemoveBackgroundWorkerRequest>) => {
   void handleRequest(event.data).then((response) => {
-    self.postMessage(response);
+    const transferables: Transferable[] = [];
+    if (response.ok && response.kind === 'remove-background') {
+      transferables.push(response.processedImageBuffer);
+    }
+    self.postMessage(response, { transfer: transferables });
   });
 });

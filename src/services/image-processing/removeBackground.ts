@@ -16,6 +16,8 @@ export interface RemoveBackgroundResult {
 }
 
 const SEGMENTATION_ASSET_BASE = import.meta.env.VITE_SEGMENTATION_MODEL_BASE_URL?.replace(/\/$/, '');
+const PRELOAD_TIMEOUT_MS = 60_000;
+const BG_REMOVAL_TIMEOUT_MS = 120_000;
 
 let workerInstance: Worker | null = null;
 let requestId = 0;
@@ -24,6 +26,7 @@ let preloadPromise: Promise<void> | null = null;
 type PendingRequest = {
   resolve: (response: RemoveBackgroundWorkerResponse) => void;
   reject: (error: unknown) => void;
+  timeoutId: ReturnType<typeof setTimeout>;
 };
 
 const pendingRequests = new Map<number, PendingRequest>();
@@ -39,7 +42,10 @@ function getWorkerConfig(): RemoveBackgroundWorkerConfig {
 }
 
 function rejectAllPendingRequests(error: unknown) {
-  pendingRequests.forEach(({ reject }) => reject(error));
+  pendingRequests.forEach(({ reject, timeoutId }) => {
+    clearTimeout(timeoutId);
+    reject(error);
+  });
   pendingRequests.clear();
 }
 
@@ -55,6 +61,7 @@ function createWorker(): Worker {
       return;
     }
 
+    clearTimeout(pending.timeoutId);
     pendingRequests.delete(response.id);
     pending.resolve(response);
   });
@@ -79,14 +86,29 @@ function getWorker(): Worker {
 }
 
 function callWorker(
-  buildRequest: (id: number, config: RemoveBackgroundWorkerConfig) => RemoveBackgroundWorkerRequest
+  buildRequest: (id: number, config: RemoveBackgroundWorkerConfig) => RemoveBackgroundWorkerRequest,
+  timeoutMs: number
 ): Promise<RemoveBackgroundWorkerResponse> {
   const id = ++requestId;
   const config = getWorkerConfig();
   const request = buildRequest(id, config);
 
   return new Promise<RemoveBackgroundWorkerResponse>((resolve, reject) => {
-    pendingRequests.set(id, { resolve, reject });
+    const timeoutId = setTimeout(() => {
+      if (!pendingRequests.has(id)) return;
+      pendingRequests.delete(id);
+
+      if (workerInstance) {
+        workerInstance.terminate();
+        workerInstance = null;
+      }
+      preloadPromise = null;
+      rejectAllPendingRequests(new Error('Worker terminated due to timeout'));
+
+      reject(new Error(`Background removal worker timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    pendingRequests.set(id, { resolve, reject, timeoutId });
     getWorker().postMessage(request);
   });
 }
@@ -102,7 +124,7 @@ export async function preloadBackgroundRemovalModel(): Promise<void> {
       id,
       kind: 'preload',
       config,
-    }))
+    }), PRELOAD_TIMEOUT_MS)
       .then((response) => {
         if (!response.ok) {
           throw toPipelineError(response);
@@ -133,7 +155,7 @@ export async function removeImageBackground(
       mimeType,
       maxInferenceLongEdge,
       config,
-    }));
+    }), BG_REMOVAL_TIMEOUT_MS);
 
     if (!response.ok) {
       throw toPipelineError(response);
@@ -142,8 +164,9 @@ export async function removeImageBackground(
       throw new ImagePipelineError('BACKGROUND_REMOVAL_FAILED', 'Invalid background removal worker response');
     }
 
+    const blob = new Blob([response.processedImageBuffer], { type: 'image/png' });
     return {
-      processedImageData: response.processedImageBase64,
+      processedImageData: URL.createObjectURL(blob),
       inferenceSize: response.inferenceSize,
       durationMs: response.durationMs,
     };

@@ -33,7 +33,7 @@ export interface RemoveBackgroundWorkerRunSuccess {
   id: number;
   ok: true;
   kind: 'remove-background';
-  processedImageBase64: string;
+  processedImageBuffer: ArrayBuffer;
   inferenceSize: Size;
   durationMs: number;
 }
