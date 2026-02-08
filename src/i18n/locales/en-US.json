@@ -211,7 +211,8 @@
       "imagePipelineLoadFailed": "Failed to load image processing model. Please try again shortly.",
       "imagePipelineInferenceFailed": "Image processing failed. Please try another image.",
       "backgroundRemovalFailed": "Background removal failed. Try an image with a clearer subject.",
-      "storageFailed": "Could not save image locally. Your work may not persist if you navigate away."
+      "storageFailed": "Could not save image locally. Your work may not persist if you navigate away.",
+      "analysisFailed": "Failed to analyze screenshot. Please try again."
     },
     "prompts": {
       "instruction": "Please answer in English.",

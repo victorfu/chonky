@@ -148,6 +148,6 @@ export async function analyzeScreenshot(
     };
   } catch (error) {
     console.error('Screenshot analysis error:', error);
-    throw new Error('Failed to analyze screenshot. Please try again.');
+    throw new Error(i18n.t('screenshot.errors.analysisFailed', { lng: language }));
   }
 }

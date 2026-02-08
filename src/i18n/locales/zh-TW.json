@@ -211,7 +211,8 @@
       "imagePipelineLoadFailed": "影像模型載入失敗，請稍後再試。",
       "imagePipelineInferenceFailed": "影像處理失敗，請換一張圖片再試。",
       "backgroundRemovalFailed": "去背景失敗，請嘗試更清晰的主體圖片。",
-      "storageFailed": "無法在本地儲存圖片，離開頁面後可能會遺失。"
+      "storageFailed": "無法在本地儲存圖片，離開頁面後可能會遺失。",
+      "analysisFailed": "截圖分析失敗，請再試一次。"
     },
     "prompts": {
       "instruction": "請用繁體中文回答。",

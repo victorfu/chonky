@@ -211,7 +211,8 @@
       "imagePipelineLoadFailed": "画像処理モデルの読み込みに失敗しました。しばらくしてから再試行してください。",
       "imagePipelineInferenceFailed": "画像処理に失敗しました。別の画像で再試行してください。",
       "backgroundRemovalFailed": "背景除去に失敗しました。被写体がはっきりした画像をお試しください。",
-      "storageFailed": "画像をローカルに保存できませんでした。ページを離れるとデータが失われる可能性があります。"
+      "storageFailed": "画像をローカルに保存できませんでした。ページを離れるとデータが失われる可能性があります。",
+      "analysisFailed": "スクリーンショットの分析に失敗しました。もう一度お試しください。"
     },
     "prompts": {
       "instruction": "日本語で答えてください。",
