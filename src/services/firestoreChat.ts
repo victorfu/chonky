@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  limitToLast,
   onSnapshot,
   orderBy,
   query,
@@ -160,7 +161,7 @@ export function subscribeChatMessages(
   const messagesQuery = query(
     getMessagesRef(uid),
     orderBy('createdAtMs', 'asc'),
-    limit(CHAT_MESSAGES_QUERY_LIMIT)
+    limitToLast(CHAT_MESSAGES_QUERY_LIMIT)
   );
 
   return onSnapshot(
@@ -187,7 +188,9 @@ export async function addChatMessage(
   const messageRef = doc(getMessagesRef(uid));
   const createdAtMs = message.createdAtMs ?? Date.now();
 
-  await setDoc(
+  const batch = writeBatch(db);
+
+  batch.set(
     messageRef,
     {
       role: message.role,
@@ -200,7 +203,7 @@ export async function addChatMessage(
     { merge: true }
   );
 
-  await setDoc(
+  batch.set(
     getChatRef(uid),
     {
       schemaVersion: CHAT_SCHEMA_VERSION,
@@ -209,6 +212,8 @@ export async function addChatMessage(
     },
     { merge: true }
   );
+
+  await batch.commit();
 
   return messageRef.id;
 }
