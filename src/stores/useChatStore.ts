@@ -10,7 +10,7 @@ import {
 } from '@/services/firestoreChat';
 import { generateAssistantReply, streamImageReply } from '@/services/chatProvider';
 import { analyzeScreenshot, isImageMode } from '@/services/screenshotAnalysis';
-import { uploadChatImage } from '@/services/firebaseStorage';
+import { deleteChatImage, uploadChatImage } from '@/services/firebaseStorage';
 import { useAuthStore } from './useAuthStore';
 import { useSettingsStore } from './useSettingsStore';
 
@@ -465,6 +465,9 @@ export const useChatStore = create<ChatStore>((set, get) => {
       const nowMs = Date.now();
       const userTempId = `local-user-${nowMs}`;
       let assistantTempId: string | null = null;
+      const uploadedStoragePaths = new Set<string>();
+      const persistedStoragePaths = new Set<string>();
+      let processedResultObjectUrl: string | null = null;
 
       const content = text.trim() || (mode ? `[${mode}]` : '[image]');
 
@@ -492,6 +495,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       try {
         // Upload image to Firebase Storage
         const { downloadUrl, storagePath } = await uploadChatImage(uid, userTempId, attachment.url);
+        uploadedStoragePaths.add(storagePath);
         const persistedAttachment: ChatMessageAttachment = {
           type: 'image',
           url: downloadUrl,
@@ -515,6 +519,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
           createdAtMs: nowMs,
           attachment: persistedAttachment,
         });
+        persistedStoragePaths.add(storagePath);
 
         set((state) => ({
           messages: state.messages.map((m) =>
@@ -540,9 +545,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
           let processedImageUrl = result.processedImageData;
           let processedStoragePath: string | undefined;
           if (result.resultType === 'image' && result.processedImageData) {
+            if (result.processedImageData.startsWith('blob:')) {
+              processedResultObjectUrl = result.processedImageData;
+            }
             const processedUpload = await uploadChatImage(uid, nextAssistantTempId, result.processedImageData);
             processedImageUrl = processedUpload.downloadUrl;
             processedStoragePath = processedUpload.storagePath;
+            uploadedStoragePaths.add(processedStoragePath);
           }
 
           const processedAttachment: ChatMessageAttachment | undefined =
@@ -584,6 +593,9 @@ export const useChatStore = create<ChatStore>((set, get) => {
             processedImageData: processedImageUrl ?? undefined,
             attachment: processedAttachment,
           });
+          if (processedStoragePath) {
+            persistedStoragePaths.add(processedStoragePath);
+          }
 
           set((state) => ({
             messages: state.messages.map((m) =>
@@ -655,6 +667,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
           ),
         }));
       } catch (error) {
+        const cleanupPaths = Array.from(uploadedStoragePaths).filter(
+          (path) => !persistedStoragePaths.has(path)
+        );
+        if (cleanupPaths.length > 0) {
+          await Promise.all(cleanupPaths.map((path) => deleteChatImage(path)));
+        }
+
         console.error('Failed to send image message:', error);
         set((state) => ({
           streamingContent: '',
@@ -668,6 +687,9 @@ export const useChatStore = create<ChatStore>((set, get) => {
         }));
         throw error;
       } finally {
+        if (processedResultObjectUrl && typeof URL !== 'undefined') {
+          URL.revokeObjectURL(processedResultObjectUrl);
+        }
         set({ isSending: false });
       }
     },
