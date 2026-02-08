@@ -10,11 +10,27 @@ export interface GenerateOptions {
   history?: Array<{ role: 'user' | 'model'; content: string }>;
 }
 
+interface SystemInstructionContent {
+  role: 'system';
+  parts: Array<{ text: string }>;
+}
+
 /**
  * Factory function to get a GenerativeModel instance for a specific model
  */
 function getModel(modelId: ModelType) {
   return getGenerativeModel(ai, { model: modelId });
+}
+
+function buildSystemInstruction(systemPrompt?: string): SystemInstructionContent | undefined {
+  if (!systemPrompt?.trim()) {
+    return undefined;
+  }
+
+  return {
+    role: 'system',
+    parts: [{ text: systemPrompt.trim() }],
+  };
 }
 
 /**
@@ -28,6 +44,7 @@ export async function generateResponse(
 ): Promise<string> {
   try {
     const geminiModel = getModel(model);
+    const systemInstruction = buildSystemInstruction(options?.systemPrompt);
 
     // Build the chat history if provided
     const history = options?.history?.map((msg) => ({
@@ -39,7 +56,7 @@ export async function generateResponse(
     if (history?.length || options?.systemPrompt) {
       const chat = geminiModel.startChat({
         history: history ?? [],
-        systemInstruction: options?.systemPrompt,
+        ...(systemInstruction ? { systemInstruction } : {}),
       });
 
       const result = await chat.sendMessage(prompt);
@@ -69,6 +86,7 @@ export async function streamResponse(
 ): Promise<void> {
   try {
     const geminiModel = getModel(model);
+    const systemInstruction = buildSystemInstruction(options?.systemPrompt);
 
     // Build the chat history if provided
     const history = options?.history?.map((msg) => ({
@@ -82,7 +100,7 @@ export async function streamResponse(
     if (history?.length || options?.systemPrompt) {
       const chat = geminiModel.startChat({
         history: history ?? [],
-        systemInstruction: options?.systemPrompt,
+        ...(systemInstruction ? { systemInstruction } : {}),
       });
 
       result = await chat.sendMessageStream(prompt);

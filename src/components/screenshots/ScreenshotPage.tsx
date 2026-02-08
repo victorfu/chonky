@@ -3,74 +3,27 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useScreenshotStore } from '@/stores/useScreenshotStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useToast } from '@/hooks/useToast';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { FloatingCommandBar } from './FloatingCommandBar';
 import { AnalysisResult } from './AnalysisResult';
 import type { ModelType } from '@/types';
-import type { AnalysisMode } from '@/types/screenshot';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-
-const PENDING_ANALYSIS_KEY = 'pending-analysis';
-const DRAFT_IMAGE_KEY = 'draft-image';
-
-type PendingAnalysis = {
-  image: string | null;
-  mode: AnalysisMode;
-  model: ModelType;
-  pendingAnalyze: boolean;
-};
-
-function loadPendingAnalysis(): PendingAnalysis | null {
-  try {
-    const raw = sessionStorage.getItem(PENDING_ANALYSIS_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as PendingAnalysis;
-  } catch {
-    return null;
-  }
-}
-
-function savePendingAnalysis(payload: PendingAnalysis) {
-  try {
-    sessionStorage.setItem(PENDING_ANALYSIS_KEY, JSON.stringify(payload));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-function clearPendingAnalysis() {
-  try {
-    sessionStorage.removeItem(PENDING_ANALYSIS_KEY);
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-function saveDraftImage(image: string | null) {
-  try {
-    if (image) {
-      sessionStorage.setItem(DRAFT_IMAGE_KEY, image);
-    } else {
-      sessionStorage.removeItem(DRAFT_IMAGE_KEY);
-    }
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-function loadDraftImage(): string | null {
-  try {
-    return sessionStorage.getItem(DRAFT_IMAGE_KEY);
-  } catch {
-    return null;
-  }
-}
+import {
+  saveDraftImage,
+  loadDraftImage,
+  savePendingAnalysis,
+  loadPendingAnalysis,
+  clearPendingAnalysis,
+  migrateLegacyKeys,
+} from '@/services/screenshotStorage';
 
 export function ScreenshotPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { warning } = useToast();
   const resumeAttempted = useRef(false);
   const skipDraftRestoreRef = useRef(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -92,87 +45,120 @@ export function ScreenshotPage() {
     analyze,
   } = useScreenshotStore();
 
-  const persistAnalysisSnapshot = (pendingAnalyze: boolean) => {
-    savePendingAnalysis({
+  const warnStorageFailed = () => {
+    warning(t('screenshot.errors.storageFailed', 'Could not save image locally. Your work may not persist if you navigate away.'), { duration: 6000 });
+  };
+
+  const persistAnalysisSnapshot = async (pendingAnalyze: boolean) => {
+    const ok = await savePendingAnalysis({
       image: currentImage,
       mode: selectedMode,
       model: selectedModel,
       pendingAnalyze,
     });
+    if (!ok) warnStorageFailed();
   };
 
-  const handleSignIn = () => {
-    persistAnalysisSnapshot(false);
+  const handleSignIn = async () => {
+    await persistAnalysisSnapshot(false);
     navigate('/login', { state: { from: location } });
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     const requiresAuth = selectedMode !== 'remove-bg';
 
     // Keep current image resilient to unexpected refresh during heavy image processing.
-    saveDraftImage(currentImage);
+    const draftOk = saveDraftImage(currentImage);
 
     if (!isAuthenticated && requiresAuth) {
-      persistAnalysisSnapshot(true);
+      // Await both storage writes before navigating away to avoid unmount races.
+      if (!(await draftOk)) warnStorageFailed();
+      await persistAnalysisSnapshot(true);
       navigate('/login', { state: { from: location, pendingAnalyze: true } });
       return;
     }
 
+    // Fire-and-forget when not navigating — don't block analysis.
+    void draftOk.then((ok) => { if (!ok) warnStorageFailed(); });
     analyze();
   };
 
   const handleClear = () => {
     // Prevent immediate draft restoration on the next render after manual clear.
     skipDraftRestoreRef.current = true;
-    saveDraftImage(null);
+    saveDraftImage(null).catch((err) => {
+      console.error('[ScreenshotPage] Failed to clear draft image:', err);
+    });
     clearImage();
   };
 
   useEffect(() => {
-    if (currentImage) {
-      return;
-    }
+    migrateLegacyKeys();
+  }, []);
 
+  useEffect(() => {
+    if (currentImage) return;
     if (skipDraftRestoreRef.current) {
       skipDraftRestoreRef.current = false;
       return;
     }
 
-    const draftImage = loadDraftImage();
-    if (draftImage) {
-      setImage(draftImage);
-    }
+    let cancelled = false;
+    (async () => {
+      const { data, failed } = await loadDraftImage();
+      if (cancelled || skipDraftRestoreRef.current) return;
+      if (failed) {
+        warnStorageFailed();
+      } else if (data) {
+        setImage(data);
+      }
+    })().catch((err) => {
+      console.error('[ScreenshotPage] Failed to restore draft:', err);
+    });
+    return () => { cancelled = true; };
   }, [currentImage, setImage]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
     if (resumeAttempted.current) return;
-
-    const pending = loadPendingAnalysis();
-    if (!pending) return;
-
     resumeAttempted.current = true;
 
-    if (pending.image && !currentImage) {
-      setImage(pending.image);
-    }
-    if (pending.mode) {
-      setMode(pending.mode);
-    }
-    if (pending.model) {
-      setModel(pending.model);
-    }
+    let cancelled = false;
+    (async () => {
+      const { data: pending, failed } = await loadPendingAnalysis();
+      if (cancelled) return;
+      if (failed) {
+        warnStorageFailed();
+        return;
+      }
+      if (!pending) return;
 
-    clearPendingAnalysis();
+      if (pending.image && !currentImage) {
+        setImage(pending.image);
+      }
+      if (pending.mode) {
+        setMode(pending.mode);
+      }
+      if (pending.model) {
+        setModel(pending.model);
+      }
 
-    if (pending.pendingAnalyze && pending.image) {
-      setTimeout(() => analyze(), 0);
-    }
+      await clearPendingAnalysis();
+
+      if (pending.pendingAnalyze && pending.image) {
+        setTimeout(analyze, 0);
+      }
+    })().catch((err) => {
+      console.error('[ScreenshotPage] Failed to restore pending analysis:', err);
+    });
+    return () => { cancelled = true; };
   }, [isAuthenticated, currentImage, analyze, setImage, setMode, setModel]);
 
   useEffect(() => {
     if (!currentImage) {
-      saveDraftImage(null);
+      saveDraftImage(null).catch((err) => {
+        console.error('[ScreenshotPage] Failed to clear draft image:', err);
+      });
     }
   }, [currentImage]);
 

@@ -59,6 +59,21 @@ function clearPendingMessage(): void {
   }
 }
 
+function getChatSendErrorMessage(error: unknown): string {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    typeof error.code === 'string'
+  ) {
+    if (error.code === 'permission-denied') {
+      return 'Firestore permission denied. Deploy/update rules for user_chats and ensure current user is authenticated.';
+    }
+  }
+
+  return error instanceof Error ? error.message : 'Failed to send message';
+}
+
 interface ChatStore {
   messages: ChatMessage[];
   draftInput: string;
@@ -167,8 +182,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       return;
     }
 
-    const uid = activeUid ?? useAuthStore.getState().user?.id ?? null;
-    if (!uid) {
+    const authUid = useAuthStore.getState().user?.id ?? null;
+    const uid = activeUid ?? authUid;
+    if (!authUid || !uid || uid !== authUid) {
       savePendingMessage(content);
       throw createAuthRequiredError();
     }
@@ -262,7 +278,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           }
           return message;
         }),
-        error: error instanceof Error ? error.message : 'Failed to send message',
+        error: getChatSendErrorMessage(error),
       }));
       throw error;
     } finally {

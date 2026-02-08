@@ -58,7 +58,7 @@
       "profileSettings": "プロフィール設定",
       "profileSettingsDesc": "プロフィールタブでプロフィール設定を更新してください。",
       "cloudSyncTitle": "クラウド同期",
-      "cloudSyncDesc": "設定は Firestore に保存され、ログイン済み端末間で同期されます。",
+      "cloudSyncDesc": "設定は保存され、ログイン済み端末間で同期されます。",
       "updateError": "設定の更新に失敗しました",
       "dataManagement": "データ管理",
       "exportData": "データをエクスポート",
@@ -127,10 +127,6 @@
     "settings": "設定"
   },
   "chatHome": {
-    "heroTitle": "チャット中心のワークスペース",
-    "heroSubtitle": "対話で要件整理、実装計画、リスク確認を進められます。画像分析は補助フローとして利用できます。",
-    "openAnalyze": "分析ページへ",
-    "signIn": "ログイン",
     "threadLabel": "会話",
     "threadHint": "ログイン中のデバイス間でメッセージがリアルタイム同期されます。",
     "clearConversation": "クリア",

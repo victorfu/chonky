@@ -11,13 +11,13 @@ interface GenerateAssistantReplyOptions {
   messages?: ChatMessage[];
 }
 
-const SYSTEM_PROMPTS: Record<Language, string> = {
+const LANGUAGE_INSTRUCTIONS: Record<Language, string> = {
   'zh-TW':
-    '你是一位專業且務實的 AI 助手。請使用繁體中文回覆，內容清楚、可執行，優先提供具體步驟。',
+    '請使用繁體中文回覆，內容清楚、可執行，優先提供具體步驟。',
   'en-US':
-    'You are a pragmatic AI assistant. Reply in concise, actionable English with clear next steps.',
+    'Reply in concise, actionable English with clear next steps.',
   'ja-JP':
-    'あなたは実務的な AI アシスタントです。日本語で簡潔かつ実行可能な提案を返してください。',
+    '日本語で簡潔かつ実行可能な提案を返してください。',
 };
 
 function mapToFirebaseRole(role: ChatMessage['role']): FirebaseChatRole {
@@ -49,11 +49,11 @@ export async function generateAssistantReply(
     throw new Error('Message content cannot be empty');
   }
 
-  const reply = await generateResponse(content, options.model, {
-    systemPrompt: SYSTEM_PROMPTS[options.language],
+  const promptedInput = `${LANGUAGE_INSTRUCTIONS[options.language]}\n\n${content}`;
+
+  const reply = await generateResponse(promptedInput, options.model, {
     history: toConversationHistory(options.messages),
   });
 
   return reply.trim();
 }
-

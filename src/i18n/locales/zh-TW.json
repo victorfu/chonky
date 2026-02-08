@@ -58,7 +58,7 @@
       "profileSettings": "個人檔案設定",
       "profileSettingsDesc": "在「個人檔案」分頁中更新您的個人資料。",
       "cloudSyncTitle": "雲端同步",
-      "cloudSyncDesc": "您的設定會儲存在 Firestore，並在已登入裝置間同步。",
+      "cloudSyncDesc": "您的設定會儲存，並在已登入裝置間同步。",
       "updateError": "更新設定失敗",
       "dataManagement": "資料管理",
       "exportData": "匯出資料",
@@ -127,10 +127,6 @@
     "settings": "設定"
   },
   "chatHome": {
-    "heroTitle": "對話式工作入口",
-    "heroSubtitle": "用對話快速整理需求、規劃實作、檢查風險。若需要圖片流程，仍可切換到分析頁。",
-    "openAnalyze": "前往分析頁",
-    "signIn": "登入",
     "threadLabel": "對話",
     "threadHint": "登入後訊息會在你的裝置之間即時同步。",
     "clearConversation": "清空",
@@ -214,7 +210,8 @@
       "noImageInClipboard": "剪貼簿中找不到圖片",
       "imagePipelineLoadFailed": "影像模型載入失敗，請稍後再試。",
       "imagePipelineInferenceFailed": "影像處理失敗，請換一張圖片再試。",
-      "backgroundRemovalFailed": "去背景失敗，請嘗試更清晰的主體圖片。"
+      "backgroundRemovalFailed": "去背景失敗，請嘗試更清晰的主體圖片。",
+      "storageFailed": "無法在本地儲存圖片，離開頁面後可能會遺失。"
     },
     "prompts": {
       "instruction": "請用繁體中文回答。",

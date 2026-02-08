@@ -58,7 +58,7 @@
       "profileSettings": "Profile Settings",
       "profileSettingsDesc": "Update your profile settings in the Profile tab.",
       "cloudSyncTitle": "Cloud Sync",
-      "cloudSyncDesc": "Your settings are stored in Firestore and sync across signed-in devices.",
+      "cloudSyncDesc": "Your settings are saved and sync across signed-in devices.",
       "updateError": "Failed to update settings",
       "dataManagement": "Data Management",
       "exportData": "Export Data",
@@ -127,10 +127,6 @@
     "settings": "Settings"
   },
   "chatHome": {
-    "heroTitle": "Chat-first Workspace",
-    "heroSubtitle": "Use conversation to clarify scope, plan execution, and review risks. Screenshot analysis remains available as a secondary flow.",
-    "openAnalyze": "Open Analyze",
-    "signIn": "Sign in",
     "threadLabel": "Conversation",
     "threadHint": "Messages sync in real time across your signed-in devices.",
     "clearConversation": "Clear",
@@ -214,7 +210,8 @@
       "noImageInClipboard": "No image found in clipboard",
       "imagePipelineLoadFailed": "Failed to load image processing model. Please try again shortly.",
       "imagePipelineInferenceFailed": "Image processing failed. Please try another image.",
-      "backgroundRemovalFailed": "Background removal failed. Try an image with a clearer subject."
+      "backgroundRemovalFailed": "Background removal failed. Try an image with a clearer subject.",
+      "storageFailed": "Could not save image locally. Your work may not persist if you navigate away."
     },
     "prompts": {
       "instruction": "Please answer in English.",
