@@ -17,6 +17,7 @@ export {
   DEFAULT_SETTINGS,
   DEFAULT_MODEL,
   SUPPORTED_MODELS,
+  MODEL_LABELS,
   isValidModel,
   getValidModelOrDefault,
 } from './settings';

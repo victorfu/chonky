@@ -103,12 +103,11 @@ async function blobToImageBitmap(blob: Blob): Promise<ImageBitmap> {
 }
 
 async function decodeInputBlob(imageBase64: string, mimeType: string): Promise<Blob> {
-  const binary = atob(imageBase64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
+  const res = await fetch(`data:${mimeType};base64,${imageBase64}`);
+  if (!res.ok) {
+    throw new Error(`Failed to decode base64 image (status ${res.status})`);
   }
-  return new Blob([bytes], { type: mimeType });
+  return res.blob();
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {

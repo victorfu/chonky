@@ -12,10 +12,6 @@ import {
 import { useAuthStore } from './useAuthStore';
 import i18n from '@/i18n';
 
-let authStoreUnsubscribe: (() => void) | null = null;
-let firestoreSettingsUnsubscribe: (() => void) | null = null;
-let activeUid: string | null = null;
-
 function applySettingsSideEffects(settings: UserSettings) {
   themeService.setTheme(settings.appearance.theme);
   void i18n.changeLanguage(settings.general.language);
@@ -48,143 +44,149 @@ interface SettingsStore {
   resetSettings: () => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  settings: DEFAULT_SETTINGS,
-  isLoading: true,
+export const useSettingsStore = create<SettingsStore>((set, get) => {
+  let authStoreUnsubscribe: (() => void) | null = null;
+  let firestoreSettingsUnsubscribe: (() => void) | null = null;
+  let activeUid: string | null = null;
 
-  initialize: () => {
-    themeService.initialize(DEFAULT_SETTINGS.appearance.theme);
-    void i18n.changeLanguage(DEFAULT_SETTINGS.general.language);
-    set({ settings: DEFAULT_SETTINGS, isLoading: false });
+  return {
+    settings: DEFAULT_SETTINGS,
+    isLoading: true,
 
-    const bindUserSettings = async (uid: string | null) => {
-      if (activeUid === uid) {
-        return;
-      }
+    initialize: () => {
+      themeService.initialize(DEFAULT_SETTINGS.appearance.theme);
+      void i18n.changeLanguage(DEFAULT_SETTINGS.general.language);
+      set({ settings: DEFAULT_SETTINGS, isLoading: false });
 
-      firestoreSettingsUnsubscribe?.();
-      firestoreSettingsUnsubscribe = null;
-      activeUid = uid;
+      const bindUserSettings = async (uid: string | null) => {
+        if (activeUid === uid) {
+          return;
+        }
 
-      if (!uid) {
-        set({ settings: DEFAULT_SETTINGS, isLoading: false });
-        applySettingsSideEffects(DEFAULT_SETTINGS);
-        return;
-      }
+        firestoreSettingsUnsubscribe?.();
+        firestoreSettingsUnsubscribe = null;
+        activeUid = uid;
 
-      set({ isLoading: true });
-      const currentUid = uid;
-
-      try {
-        await ensureDefaultUserSettings(uid);
-      } catch (error) {
-        console.error('Failed to ensure default Firestore settings:', error);
-      }
-
-      if (activeUid !== currentUid) {
-        return;
-      }
-
-      firestoreSettingsUnsubscribe = subscribeUserSettings(
-        uid,
-        (settings) => {
-          const normalized = normalizeUserSettings(settings);
-          set({ settings: normalized, isLoading: false });
-          applySettingsSideEffects(normalized);
-        },
-        (error) => {
-          console.error('Failed to subscribe Firestore settings:', error);
+        if (!uid) {
           set({ settings: DEFAULT_SETTINGS, isLoading: false });
           applySettingsSideEffects(DEFAULT_SETTINGS);
+          return;
         }
-      );
-    };
 
-    void bindUserSettings(useAuthStore.getState().user?.id ?? null);
+        set({ isLoading: true });
+        const currentUid = uid;
 
-    authStoreUnsubscribe?.();
-    authStoreUnsubscribe = useAuthStore.subscribe((state, previousState) => {
-      const uid = state.user?.id ?? null;
-      const previousUid = previousState.user?.id ?? null;
+        try {
+          await ensureDefaultUserSettings(uid);
+        } catch (error) {
+          console.error('Failed to ensure default Firestore settings:', error);
+        }
 
-      if (uid !== previousUid) {
-        void bindUserSettings(uid);
-      }
-    });
+        if (activeUid !== currentUid) {
+          return;
+        }
 
-    return () => {
+        firestoreSettingsUnsubscribe = subscribeUserSettings(
+          uid,
+          (settings) => {
+            const normalized = normalizeUserSettings(settings);
+            set({ settings: normalized, isLoading: false });
+            applySettingsSideEffects(normalized);
+          },
+          (error) => {
+            console.error('Failed to subscribe Firestore settings:', error);
+            set({ settings: DEFAULT_SETTINGS, isLoading: false });
+            applySettingsSideEffects(DEFAULT_SETTINGS);
+          }
+        );
+      };
+
+      void bindUserSettings(useAuthStore.getState().user?.id ?? null);
+
       authStoreUnsubscribe?.();
-      authStoreUnsubscribe = null;
-      firestoreSettingsUnsubscribe?.();
-      firestoreSettingsUnsubscribe = null;
-      activeUid = null;
-    };
-  },
+      authStoreUnsubscribe = useAuthStore.subscribe((state, previousState) => {
+        const uid = state.user?.id ?? null;
+        const previousUid = previousState.user?.id ?? null;
 
-  updateSettings: async (updates) => {
-    const uid = useAuthStore.getState().user?.id;
-    if (!uid) {
-      throw new Error('User must be signed in to update settings');
-    }
+        if (uid !== previousUid) {
+          void bindUserSettings(uid);
+        }
+      });
 
-    const previous = get().settings;
-    const next = mergeSettings(previous, updates);
-    set({ settings: next });
-    applySettingsSideEffects(next);
+      return () => {
+        authStoreUnsubscribe?.();
+        authStoreUnsubscribe = null;
+        firestoreSettingsUnsubscribe?.();
+        firestoreSettingsUnsubscribe = null;
+        activeUid = null;
+      };
+    },
 
-    try {
-      await upsertUserSettings(uid, next);
-    } catch (error) {
-      set({ settings: previous });
-      applySettingsSideEffects(previous);
-      throw error;
-    }
-  },
+    updateSettings: async (updates) => {
+      const uid = useAuthStore.getState().user?.id;
+      if (!uid) {
+        throw new Error('User must be signed in to update settings');
+      }
 
-  updateGeneralSettings: async (updates) => {
-    await get().updateSettings({
-      general: { ...get().settings.general, ...updates },
-    });
-  },
+      const previous = get().settings;
+      const next = mergeSettings(previous, updates);
+      set({ settings: next });
+      applySettingsSideEffects(next);
 
-  updateAppearanceSettings: async (updates) => {
-    await get().updateSettings({
-      appearance: { ...get().settings.appearance, ...updates },
-    });
-  },
+      try {
+        await upsertUserSettings(uid, next);
+      } catch (error) {
+        set({ settings: previous });
+        applySettingsSideEffects(previous);
+        throw error;
+      }
+    },
 
-  updateChatSettings: async (updates) => {
-    await get().updateSettings({
-      chat: { ...get().settings.chat, ...updates },
-    });
-  },
+    updateGeneralSettings: async (updates) => {
+      await get().updateSettings({
+        general: { ...get().settings.general, ...updates },
+      });
+    },
 
-  updateProfileSettings: async (updates) => {
-    await get().updateSettings({
-      profile: { ...get().settings.profile, ...updates },
-    });
-  },
+    updateAppearanceSettings: async (updates) => {
+      await get().updateSettings({
+        appearance: { ...get().settings.appearance, ...updates },
+      });
+    },
 
-  setTheme: async (theme) => {
-    await get().updateAppearanceSettings({ theme });
-  },
+    updateChatSettings: async (updates) => {
+      await get().updateSettings({
+        chat: { ...get().settings.chat, ...updates },
+      });
+    },
 
-  resetSettings: async () => {
-    const uid = useAuthStore.getState().user?.id;
-    if (!uid) {
-      throw new Error('User must be signed in to reset settings');
-    }
+    updateProfileSettings: async (updates) => {
+      await get().updateSettings({
+        profile: { ...get().settings.profile, ...updates },
+      });
+    },
 
-    const previous = get().settings;
-    set({ settings: DEFAULT_SETTINGS });
-    applySettingsSideEffects(DEFAULT_SETTINGS);
+    setTheme: async (theme) => {
+      await get().updateAppearanceSettings({ theme });
+    },
 
-    try {
-      await resetUserSettings(uid);
-    } catch (error) {
-      set({ settings: previous });
-      applySettingsSideEffects(previous);
-      throw error;
-    }
-  },
-}));
+    resetSettings: async () => {
+      const uid = useAuthStore.getState().user?.id;
+      if (!uid) {
+        throw new Error('User must be signed in to reset settings');
+      }
+
+      const previous = get().settings;
+      set({ settings: DEFAULT_SETTINGS });
+      applySettingsSideEffects(DEFAULT_SETTINGS);
+
+      try {
+        await resetUserSettings(uid);
+      } catch (error) {
+        set({ settings: previous });
+        applySettingsSideEffects(previous);
+        throw error;
+      }
+    },
+  };
+});

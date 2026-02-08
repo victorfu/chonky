@@ -57,11 +57,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Update Firebase profile if displayName or avatarUrl changed
     const profileUpdates: { displayName?: string; photoURL?: string } = {};
 
-    if (updates.displayName || updates.fullName) {
+    if (updates.displayName !== undefined || updates.fullName !== undefined) {
       profileUpdates.displayName = updates.displayName ?? updates.fullName;
     }
 
-    if (updates.avatarUrl) {
+    if (updates.avatarUrl !== undefined) {
       profileUpdates.photoURL = updates.avatarUrl;
     }
 

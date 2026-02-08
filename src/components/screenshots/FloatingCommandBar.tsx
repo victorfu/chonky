@@ -2,7 +2,7 @@ import { Lightbulb, Type, Languages, ImageMinus, Trash2, Zap } from 'lucide-reac
 import { useTranslation } from 'react-i18next';
 import type { AnalysisMode } from '@/types/screenshot';
 import { ANALYSIS_MODES } from '@/types/screenshot';
-import type { ModelType } from '@/types';
+import { SUPPORTED_MODELS, MODEL_LABELS, type ModelType } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { cn } from '@/utils/cn';
@@ -31,11 +31,10 @@ const modeLabelKeys: Record<AnalysisMode, string> = {
   'remove-bg': 'screenshot.modes.removeBg',
 };
 
-const modelOptions = [
-  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
-];
+const modelOptions = SUPPORTED_MODELS.map((model) => ({
+  value: model,
+  label: MODEL_LABELS[model],
+}));
 
 export function FloatingCommandBar({
   selectedMode,
