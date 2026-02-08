@@ -16,7 +16,7 @@ export function ScreenshotDropzone({ onImageSelect, currentImage }: ScreenshotDr
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
-    async (file: File) => {
+    (file: File) => {
       if (!file.type.startsWith('image/')) {
         error(t('screenshot.invalidFileType', 'Please select an image file'));
         return;
