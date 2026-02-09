@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { AlertCircle, Bot, Clock3, Download, UserCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,7 @@ function formatMessageTime(isoDate: string): string {
   }).format(date);
 }
 
-export function ChatMessageBubble({ message, streamingContent }: ChatMessageBubbleProps) {
+export const ChatMessageBubble = memo(function ChatMessageBubble({ message, streamingContent }: ChatMessageBubbleProps) {
   const { t } = useTranslation();
   const isUser = message.role === 'user';
   const roleLabel = isUser
@@ -87,8 +88,9 @@ export function ChatMessageBubble({ message, streamingContent }: ChatMessageBubb
             <button
               type="button"
               onClick={() => {
+                if (!message.processedImageData) return;
                 const link = document.createElement('a');
-                link.href = message.processedImageData!;
+                link.href = message.processedImageData;
                 link.download = `processed-${Date.now()}.png`;
                 document.body.appendChild(link);
                 link.click();
@@ -145,4 +147,4 @@ export function ChatMessageBubble({ message, streamingContent }: ChatMessageBubb
       </div>
     </div>
   );
-}
+});

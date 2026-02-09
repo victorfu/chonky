@@ -25,6 +25,7 @@ import type {
 } from '@/types';
 import type { AnalysisResultType } from '@/types/screenshot';
 import { db } from './firebase';
+import { deleteChatImage } from './firebaseStorage';
 
 const USER_CHATS_COLLECTION = 'user_chats';
 const CHAT_MESSAGES_SUBCOLLECTION = 'messages';
@@ -274,6 +275,7 @@ export async function addChatMessage(
 
 export async function clearChatMessages(uid: string): Promise<void> {
   const messagesRef = getMessagesRef(uid);
+  const storagePathsToDelete: string[] = [];
 
   while (true) {
     const snapshot = await getDocs(query(messagesRef, limit(CHAT_CLEAR_BATCH_LIMIT)));
@@ -281,11 +283,32 @@ export async function clearChatMessages(uid: string): Promise<void> {
       break;
     }
 
+    // Collect Firebase Storage paths before deleting documents
+    for (const messageDoc of snapshot.docs) {
+      const data = messageDoc.data() as FirestoreChatMessage;
+      const attachment = data.attachment as Record<string, unknown> | undefined;
+      if (
+        typeof attachment === 'object' &&
+        attachment !== null &&
+        typeof attachment.storagePath === 'string' &&
+        attachment.storagePath !== ''
+      ) {
+        storagePathsToDelete.push(attachment.storagePath as string);
+      }
+    }
+
     const batch = writeBatch(db);
     snapshot.docs.forEach((messageDoc) => {
       batch.delete(messageDoc.ref);
     });
     await batch.commit();
+  }
+
+  // Best-effort cleanup of Firebase Storage files
+  if (storagePathsToDelete.length > 0) {
+    await Promise.allSettled(
+      storagePathsToDelete.map((path) => deleteChatImage(path))
+    );
   }
 
   await setDoc(

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MessageSquareText, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -31,6 +32,13 @@ export function ChatHomePage() {
   const sendMessage = useChatStore((s) => s.sendMessage);
   const sendMessageWithImage = useChatStore((s) => s.sendMessageWithImage);
   const clearConversation = useChatStore((s) => s.clearConversation);
+
+  // Revoke any lingering blob URL when the user navigates away
+  useEffect(() => {
+    return () => {
+      setDraftAttachment(null);
+    };
+  }, [setDraftAttachment]);
 
   const redirectToLogin = () => {
     navigate('/login', {

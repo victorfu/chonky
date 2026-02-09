@@ -24,7 +24,7 @@ export function ChatMessageList({
 
   useEffect(() => {
     tailRef.current?.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth', block: 'end' });
-  }, [messages.length, isSending, isStreaming, streamingContent]);
+  }, [messages.length, isSending, isStreaming]);
 
   if (isInitializing) {
     return (

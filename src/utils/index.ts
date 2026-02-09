@@ -19,3 +19,5 @@ export {
 } from './validators';
 
 export { cn } from './cn';
+
+export { arrayBufferToBase64 } from './buffer';

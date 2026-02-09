@@ -1,6 +1,4 @@
-import { getGenerativeModel } from 'firebase/ai';
-import { ai } from './firebase';
-import type { ModelType, Language } from '@/types';
+import type { Language } from '@/types';
 import type { AnalysisMode, AnalysisResultType } from '@/types/screenshot';
 import i18n from '@/i18n';
 
@@ -40,29 +38,19 @@ function mapImagePipelineErrorCode(code: unknown, language: Language): string {
   }
 }
 
-function isImagePipelineError(error: unknown): error is { code: unknown } {
+const IMAGE_PIPELINE_ERROR_CODES = new Set([
+  'IMAGE_MODEL_LOAD_FAILED',
+  'BACKGROUND_REMOVAL_FAILED',
+]);
+
+function isImagePipelineError(error: unknown): error is { code: string } {
   return (
     typeof error === 'object' &&
     error !== null &&
-    'code' in error
+    'code' in error &&
+    typeof (error as Record<string, unknown>).code === 'string' &&
+    IMAGE_PIPELINE_ERROR_CODES.has((error as Record<string, unknown>).code as string)
   );
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  let binary = '';
-
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    const chunk = bytes.subarray(offset, offset + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-
-  return btoa(binary);
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  return arrayBufferToBase64(await blob.arrayBuffer());
 }
 
 async function fetchBlob(url: string): Promise<Blob> {
@@ -71,43 +59,6 @@ async function fetchBlob(url: string): Promise<Blob> {
     throw new Error(`Failed to fetch image blob (status ${response.status})`);
   }
   return response.blob();
-}
-
-async function resolveInlineData(
-  imageInput: string | Blob,
-  fallbackMimeType: string
-): Promise<{ data: string; mimeType: string }> {
-  if (imageInput instanceof Blob) {
-    return {
-      data: await blobToBase64(imageInput),
-      mimeType: imageInput.type || fallbackMimeType,
-    };
-  }
-
-  const dataUrlMatch = imageInput.match(DATA_URL_PATTERN);
-  if (dataUrlMatch) {
-    return {
-      mimeType: dataUrlMatch[1],
-      data: dataUrlMatch[2],
-    };
-  }
-
-  if (
-    imageInput.startsWith('blob:') ||
-    imageInput.startsWith('http://') ||
-    imageInput.startsWith('https://')
-  ) {
-    const blob = await fetchBlob(imageInput);
-    return {
-      data: await blobToBase64(blob),
-      mimeType: blob.type || fallbackMimeType,
-    };
-  }
-
-  return {
-    data: imageInput,
-    mimeType: fallbackMimeType,
-  };
 }
 
 async function resolveImageBlob(imageInput: string | Blob, fallbackMimeType: string): Promise<Blob> {
@@ -172,73 +123,34 @@ async function analyzeImageMode(
     throw new Error(`Unsupported image mode: ${mode}`);
   } catch (error) {
     if (isImagePipelineError(error)) {
-      throw new Error(mapImagePipelineErrorCode(error.code, language));
+      const wrapped = new Error(mapImagePipelineErrorCode(error.code, language));
+      (wrapped as unknown as Record<string, unknown>).cause = error;
+      throw wrapped;
     }
 
     console.error('Image mode analysis error:', error);
-    throw new Error(i18n.t('screenshot.errors.imagePipelineInferenceFailed', { lng: language }));
+    const wrapped = new Error(i18n.t('screenshot.errors.imagePipelineInferenceFailed', { lng: language }));
+    (wrapped as unknown as Record<string, unknown>).cause = error;
+    throw wrapped;
   }
 }
 
 /**
- * Analyze a screenshot using Gemini Vision (text modes) and local models (image modes).
+ * Analyze a screenshot using local image processing models.
  * @param imageInput - Base64 string, data URL, object URL, or Blob image source
- * @param mode - Analysis mode
- * @param model - Model to use for text modes
- * @param language - Target language for the analysis
- * @param onChunk - Callback for streaming chunks
+ * @param mode - Analysis mode (must be an image mode, e.g. 'remove-bg')
+ * @param language - Target language for error messages
  * @param mimeType - Fallback image mime type
  */
 export async function analyzeScreenshot(
   imageInput: string | Blob,
   mode: AnalysisMode,
-  model: ModelType,
   language: Language = 'zh-TW',
-  onChunk?: (fullText: string) => void,
   mimeType = 'image/png'
 ): Promise<ImageAnalysisResult> {
   if (isImageMode(mode)) {
     return analyzeImageMode(imageInput, mode, mimeType, language);
   }
 
-  try {
-    const geminiModel = getGenerativeModel(ai, { model });
-    const inlineData = await resolveInlineData(imageInput, mimeType);
-
-    // Get localized prompt using i18n
-    const instruction = i18n.t('screenshot.prompts.instruction', { lng: language });
-    const prompt = i18n.t(`screenshot.prompts.${mode}`, {
-      lng: language,
-      instruction,
-    });
-
-    const contentParts = [
-      { text: prompt },
-      {
-        inlineData: {
-          mimeType: inlineData.mimeType,
-          data: inlineData.data,
-        },
-      },
-    ];
-
-    const result = await geminiModel.generateContentStream(contentParts);
-
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      if (chunkText) {
-        fullText += chunkText;
-        onChunk?.(fullText);
-      }
-    }
-
-    return {
-      text: fullText,
-      resultType: 'text',
-    };
-  } catch (error) {
-    console.error('Screenshot analysis error:', error);
-    throw new Error(i18n.t('screenshot.errors.analysisFailed', { lng: language }));
-  }
+  throw new Error(`Unsupported analysis mode: ${mode}`);
 }

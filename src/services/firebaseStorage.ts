@@ -23,6 +23,9 @@ async function toBlob(input: string | Blob): Promise<{ blob: Blob; mimeType: str
   }
   if (input.startsWith('blob:')) {
     const response = await fetch(input);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch blob URL (status ${response.status}) — the object URL may have been revoked`);
+    }
     const blob = await response.blob();
     return { blob, mimeType: blob.type || 'image/png' };
   }

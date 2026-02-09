@@ -8,24 +8,26 @@ import {
   ensureDefaultChat,
   subscribeChatMessages,
 } from '@/services/firestoreChat';
-import { generateAssistantReply, streamImageReply } from '@/services/chatProvider';
-import { deleteChatImage, uploadChatImage } from '@/services/firebaseStorage';
+import { generateAssistantReply } from '@/services/chatProvider';
+import { deleteChatImage } from '@/services/firebaseStorage';
+import { processImageMessage, createPipelineTracker } from '@/services/chatImagePipeline';
 import { useAuthStore } from './useAuthStore';
 import { useSettingsStore } from './useSettingsStore';
 
 const PENDING_CHAT_MESSAGE_KEY = 'pending-chat-message';
 const AUTH_REQUIRED_ERROR_CODE = 'AUTH_REQUIRED';
+const MAX_PENDING_RETRIES = 3;
 const pendingChatStore = createStore('chonky-chat', 'pending');
-const DATA_URL_PATTERN = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
 
 type AuthRequiredError = Error & { code: typeof AUTH_REQUIRED_ERROR_CODE };
 type PendingChatMessage =
-  | { kind: 'text'; text: string }
+  | { kind: 'text'; text: string; _retryCount?: number }
   | {
       kind: 'image';
       text: string;
       attachment: ChatMessageAttachment;
       mode?: AnalysisMode;
+      _retryCount?: number;
     };
 
 function isAnalysisMode(value: unknown): value is AnalysisMode {
@@ -33,23 +35,16 @@ function isAnalysisMode(value: unknown): value is AnalysisMode {
 }
 
 function isChatMessageAttachment(value: unknown): value is ChatMessageAttachment {
+  if (typeof value !== 'object' || value === null) return false;
+  const obj = value as Record<string, unknown>;
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'type' in value &&
-    (value as Record<string, unknown>).type === 'image' &&
-    'url' in value &&
-    typeof (value as Record<string, unknown>).url === 'string' &&
-    (value as Record<string, unknown>).url !== '' &&
-    'mimeType' in value &&
-    typeof (value as Record<string, unknown>).mimeType === 'string' &&
-    (value as Record<string, unknown>).mimeType !== '' &&
-    (!('localBlob' in value) ||
-      (value as Record<string, unknown>).localBlob == null ||
-      (value as Record<string, unknown>).localBlob instanceof Blob) &&
-    (!('storagePath' in value) ||
-      (value as Record<string, unknown>).storagePath == null ||
-      typeof (value as Record<string, unknown>).storagePath === 'string')
+    obj.type === 'image' &&
+    typeof obj.url === 'string' &&
+    obj.url !== '' &&
+    typeof obj.mimeType === 'string' &&
+    obj.mimeType !== '' &&
+    (!('localBlob' in obj) || obj.localBlob == null || obj.localBlob instanceof Blob) &&
+    (!('storagePath' in obj) || obj.storagePath == null || typeof obj.storagePath === 'string')
   );
 }
 
@@ -60,83 +55,6 @@ function revokeLocalAttachmentObjectUrl(attachment: ChatMessageAttachment | null
   URL.revokeObjectURL(attachment.url);
 }
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  let binary = '';
-
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
-  }
-
-  return btoa(binary);
-}
-
-async function fetchImageBlob(url: string): Promise<Blob> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch attachment image (status ${response.status})`);
-  }
-  return response.blob();
-}
-
-async function attachmentToBlob(attachment: ChatMessageAttachment): Promise<Blob> {
-  if (attachment.localBlob instanceof Blob) {
-    return attachment.localBlob;
-  }
-
-  if (
-    attachment.url.startsWith('data:') ||
-    attachment.url.startsWith('blob:') ||
-    attachment.url.startsWith('http://') ||
-    attachment.url.startsWith('https://')
-  ) {
-    return fetchImageBlob(attachment.url);
-  }
-
-  const response = await fetch(`data:${attachment.mimeType};base64,${attachment.url}`);
-  if (!response.ok) {
-    throw new Error(`Failed to decode attachment base64 (status ${response.status})`);
-  }
-  return response.blob();
-}
-
-async function attachmentToInlineData(
-  attachment: ChatMessageAttachment
-): Promise<{ mimeType: string; base64Data: string }> {
-  if (attachment.localBlob instanceof Blob) {
-    return {
-      mimeType: attachment.localBlob.type || attachment.mimeType,
-      base64Data: arrayBufferToBase64(await attachment.localBlob.arrayBuffer()),
-    };
-  }
-
-  const dataUrlMatch = attachment.url.match(DATA_URL_PATTERN);
-  if (dataUrlMatch) {
-    return {
-      mimeType: dataUrlMatch[1],
-      base64Data: dataUrlMatch[2],
-    };
-  }
-
-  if (
-    attachment.url.startsWith('blob:') ||
-    attachment.url.startsWith('http://') ||
-    attachment.url.startsWith('https://')
-  ) {
-    const blob = await fetchImageBlob(attachment.url);
-    return {
-      mimeType: blob.type || attachment.mimeType,
-      base64Data: arrayBufferToBase64(await blob.arrayBuffer()),
-    };
-  }
-
-  return {
-    mimeType: attachment.mimeType,
-    base64Data: attachment.url,
-  };
-}
-
 function parsePendingMessage(raw: string): PendingChatMessage | null {
   const trimmed = raw.trim();
   if (!trimmed) {
@@ -145,39 +63,36 @@ function parsePendingMessage(raw: string): PendingChatMessage | null {
 
   try {
     const parsed = JSON.parse(trimmed) as unknown;
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'kind' in parsed &&
-      (parsed as Record<string, unknown>).kind === 'text' &&
-      'text' in parsed &&
-      typeof (parsed as Record<string, unknown>).text === 'string'
-    ) {
-      const text = ((parsed as Record<string, unknown>).text as string).trim();
-      return text ? { kind: 'text', text } : null;
-    }
+    if (typeof parsed === 'object' && parsed !== null) {
+      const obj = parsed as Record<string, unknown>;
 
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'kind' in parsed &&
-      (parsed as Record<string, unknown>).kind === 'image' &&
-      'text' in parsed &&
-      typeof (parsed as Record<string, unknown>).text === 'string' &&
-      'attachment' in parsed &&
-      isChatMessageAttachment((parsed as Record<string, unknown>).attachment)
-    ) {
-      const modeValue = (parsed as Record<string, unknown>).mode;
-      const mode = isAnalysisMode(modeValue) ? modeValue : undefined;
-      return {
-        kind: 'image',
-        text: (parsed as Record<string, unknown>).text as string,
-        attachment: (parsed as Record<string, unknown>).attachment as ChatMessageAttachment,
-        mode,
-      };
+      if (obj.kind === 'text' && typeof obj.text === 'string') {
+        const text = (obj.text as string).trim();
+        const rc = obj._retryCount;
+        const _retryCount = typeof rc === 'number' ? rc : undefined;
+        return text ? { kind: 'text', text, _retryCount } : null;
+      }
+
+      if (
+        obj.kind === 'image' &&
+        typeof obj.text === 'string' &&
+        isChatMessageAttachment(obj.attachment)
+      ) {
+        const mode = isAnalysisMode(obj.mode) ? obj.mode : undefined;
+        const rc = obj._retryCount;
+        const _retryCount = typeof rc === 'number' ? rc : undefined;
+        return {
+          kind: 'image',
+          text: obj.text as string,
+          attachment: obj.attachment as ChatMessageAttachment,
+          mode,
+          _retryCount,
+        };
+      }
     }
-  } catch {
+  } catch (err) {
     // Backward compatibility for previous plain-string pending payloads.
+    console.warn('[useChatStore] Failed to parse pending message JSON, falling back to text:', err);
   }
 
   return { kind: 'text', text: trimmed };
@@ -188,35 +103,30 @@ function normalizePendingMessage(value: unknown): PendingChatMessage | null {
     return parsePendingMessage(value);
   }
 
-  if (
-    typeof value === 'object' &&
-    value !== null &&
-    'kind' in value &&
-    (value as Record<string, unknown>).kind === 'text' &&
-    'text' in value &&
-    typeof (value as Record<string, unknown>).text === 'string'
-  ) {
-    const text = ((value as Record<string, unknown>).text as string).trim();
-    return text ? { kind: 'text', text } : null;
+  if (typeof value !== 'object' || value === null) return null;
+  const obj = value as Record<string, unknown>;
+
+  if (obj.kind === 'text' && typeof obj.text === 'string') {
+    const text = (obj.text as string).trim();
+    const rc = obj._retryCount;
+    const _retryCount = typeof rc === 'number' ? rc : undefined;
+    return text ? { kind: 'text', text, _retryCount } : null;
   }
 
   if (
-    typeof value === 'object' &&
-    value !== null &&
-    'kind' in value &&
-    (value as Record<string, unknown>).kind === 'image' &&
-    'text' in value &&
-    typeof (value as Record<string, unknown>).text === 'string' &&
-    'attachment' in value &&
-    isChatMessageAttachment((value as Record<string, unknown>).attachment)
+    obj.kind === 'image' &&
+    typeof obj.text === 'string' &&
+    isChatMessageAttachment(obj.attachment)
   ) {
-    const modeValue = (value as Record<string, unknown>).mode;
-    const mode = isAnalysisMode(modeValue) ? modeValue : undefined;
+    const mode = isAnalysisMode(obj.mode) ? obj.mode : undefined;
+    const rc = obj._retryCount;
+    const _retryCount = typeof rc === 'number' ? rc : undefined;
     return {
       kind: 'image',
-      text: (value as Record<string, unknown>).text as string,
-      attachment: (value as Record<string, unknown>).attachment as ChatMessageAttachment,
+      text: obj.text as string,
+      attachment: obj.attachment as ChatMessageAttachment,
       mode,
+      _retryCount,
     };
   }
 
@@ -264,15 +174,39 @@ async function savePendingTextMessage(message: string): Promise<void> {
   await savePendingMessage({ kind: 'text', text });
 }
 
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function savePendingImageMessage(
   text: string,
   attachment: ChatMessageAttachment,
   mode?: AnalysisMode
 ): Promise<void> {
+  let url = attachment.url;
+
+  // blob: URLs are session-scoped and won't survive a page reload.
+  // Convert the local blob to a data URL so the pending message can be recovered.
+  if (attachment.localBlob instanceof Blob) {
+    try {
+      url = await blobToDataUrl(attachment.localBlob);
+    } catch (err) {
+      console.warn('[useChatStore] Failed to convert blob to data URL for pending message:', err);
+      // Do not save a pending message with a dead blob: URL —
+      // it cannot be recovered after page reload.
+      return;
+    }
+  }
+
   await savePendingMessage({
     kind: 'image',
     text,
-    attachment,
+    attachment: { type: attachment.type, url, mimeType: attachment.mimeType, storagePath: attachment.storagePath },
     mode,
   });
 }
@@ -286,11 +220,14 @@ async function clearPendingMessage(): Promise<void> {
 }
 
 function findErrorWithCode(error: unknown): { code: string } | null {
-  if (error && typeof error === 'object' && 'code' in error && typeof (error as Record<string, unknown>).code === 'string') {
-    return error as { code: string };
+  if (error && typeof error === 'object') {
+    const obj = error as Record<string, unknown>;
+    if (typeof obj.code === 'string') {
+      return error as { code: string };
+    }
   }
   if (error instanceof Error && 'cause' in error) {
-    return findErrorWithCode((error as unknown as Record<string, unknown>).cause);
+    return findErrorWithCode((error as Record<string, unknown>).cause);
   }
   return null;
 }
@@ -555,11 +492,8 @@ export const useChatStore = create<ChatStore>((set, get) => {
       const { language, defaultModel } = useSettingsStore.getState().settings.general;
       const nowMs = Date.now();
       const userTempId = `local-user-${nowMs}`;
-      let assistantTempId: string | null = null;
-      const uploadedStoragePaths = new Set<string>();
-      const persistedStoragePaths = new Set<string>();
-      let processedResultObjectUrl: string | null = null;
-      let shouldRevokeInputObjectUrl = attachment.localBlob instanceof Blob && attachment.url.startsWith('blob:');
+      const tracker = createPipelineTracker();
+      const shouldRevokeInputObjectUrl = attachment.localBlob instanceof Blob && attachment.url.startsWith('blob:');
 
       const content = text.trim() || (mode ? `[${mode}]` : '[image]');
 
@@ -585,203 +519,65 @@ export const useChatStore = create<ChatStore>((set, get) => {
       }));
 
       try {
-        // Upload image to Firebase Storage
-        const { downloadUrl, storagePath } = await uploadChatImage(
-          uid,
-          userTempId,
-          attachment.localBlob ?? attachment.url
-        );
-        uploadedStoragePaths.add(storagePath);
-        const persistedAttachment: ChatMessageAttachment = {
-          type: 'image',
-          url: downloadUrl,
-          mimeType: attachment.mimeType,
-          storagePath,
-        };
-
-        // Update local message with storage URL
-        set((state) => ({
-          messages: state.messages.map((m) =>
-            m.id === userTempId ? { ...m, attachment: persistedAttachment } : m
-          ),
-        }));
-        if (shouldRevokeInputObjectUrl && typeof URL !== 'undefined') {
-          URL.revokeObjectURL(attachment.url);
-          shouldRevokeInputObjectUrl = false;
-        }
-
-        // Persist user message to Firestore
-        const persistedUserMessageId = await addChatMessage(uid, {
-          role: 'user',
-          content,
-          status: 'sent',
-          model: defaultModel,
-          createdAtMs: nowMs,
-          attachment: persistedAttachment,
-        });
-        persistedStoragePaths.add(storagePath);
-
-        set((state) => ({
-          messages: state.messages.map((m) =>
-            m.id === userTempId
-              ? { ...m, id: persistedUserMessageId, status: 'sent' }
-              : m
-          ),
-        }));
-
-        // Handle remove-bg locally
-        if (mode === 'remove-bg') {
-          const sourceBlob = await attachmentToBlob(attachment);
-          const { analyzeScreenshot } = await import('@/services/screenshotAnalysis');
-          const result = await analyzeScreenshot(
-            sourceBlob,
-            mode,
-            defaultModel,
-            language,
-            undefined,
-            sourceBlob.type || attachment.mimeType
-          );
-
-          const assistantMs = Date.now();
-          const nextAssistantTempId = `local-assistant-${assistantMs}`;
-          assistantTempId = nextAssistantTempId;
-
-          // Upload processed image to Storage if it's an image result
-          let processedImageUrl = result.processedImageData;
-          let processedStoragePath: string | undefined;
-          if (result.resultType === 'image' && result.processedImageData) {
-            if (result.processedImageData.startsWith('blob:')) {
-              processedResultObjectUrl = result.processedImageData;
-            }
-            const processedUpload = await uploadChatImage(uid, nextAssistantTempId, result.processedImageData);
-            processedImageUrl = processedUpload.downloadUrl;
-            processedStoragePath = processedUpload.storagePath;
-            uploadedStoragePaths.add(processedStoragePath);
-          }
-
-          const processedAttachment: ChatMessageAttachment | undefined =
-            result.resultType === 'image' && processedImageUrl
-              ? {
-                  type: 'image',
-                  url: processedImageUrl,
-                  mimeType: 'image/png',
-                  storagePath: processedStoragePath,
-                }
-              : undefined;
-
-          set((state) => ({
-            streamingContent: '',
-            messages: [
-              ...state.messages,
-              {
-                id: nextAssistantTempId,
-                role: 'assistant',
-                content: result.text,
-                status: 'pending',
-                createdAt: new Date(assistantMs).toISOString(),
-                createdAtMs: assistantMs,
-                model: defaultModel,
-                resultType: result.resultType,
-                processedImageData: processedImageUrl ?? undefined,
-                attachment: processedAttachment,
-              },
-            ],
-          }));
-
-          const persistedAssistantId = await addChatMessage(uid, {
-            role: 'assistant',
-            content: result.text,
-            status: 'sent',
-            model: defaultModel,
-            createdAtMs: assistantMs,
-            resultType: result.resultType,
-            processedImageData: processedImageUrl ?? undefined,
-            attachment: processedAttachment,
-          });
-          if (processedStoragePath) {
-            persistedStoragePaths.add(processedStoragePath);
-          }
-
-          set((state) => ({
-            messages: state.messages.map((m) =>
-              m.id === nextAssistantTempId
-                ? { ...m, id: persistedAssistantId, status: 'sent' }
-                : m
-            ),
-          }));
-
-          return;
-        }
-
-        // Streaming text analysis for text modes / custom prompt
-        const { mimeType, base64Data } = await attachmentToInlineData(attachment);
-
-        const assistantMs = Date.now();
-        const nextAssistantTempId = `local-assistant-${assistantMs}`;
-        assistantTempId = nextAssistantTempId;
-
-        set((state) => ({
-          messages: [
-            ...state.messages,
-            {
-              id: nextAssistantTempId,
-              role: 'assistant',
-              content: '',
-              status: 'pending',
-              createdAt: new Date(assistantMs).toISOString(),
-              createdAtMs: assistantMs,
-              model: defaultModel,
+        await processImageMessage(
+          { uid, content, attachment, mode, userTempId, nowMs, defaultModel, language },
+          {
+            onAttachmentUploaded: (tempId, persisted) => {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === tempId ? { ...m, attachment: persisted } : m
+                ),
+              }));
             },
-          ],
-        }));
-
-        const fullText = await streamImageReply(
-          base64Data,
-          mimeType,
-          { language, model: defaultModel },
-          (chunk) => {
-            set({ streamingContent: chunk });
+            onUserMessagePersisted: (tempId, persistedId) => {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === tempId ? { ...m, id: persistedId, status: 'sent' } : m
+                ),
+              }));
+            },
+            onAssistantMessageCreated: (message) => {
+              set((state) => ({
+                streamingContent: '',
+                messages: [...state.messages, message],
+              }));
+            },
+            onAssistantContentUpdated: (tempId, updatedContent) => {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === tempId ? { ...m, content: updatedContent } : m
+                ),
+              }));
+            },
+            onAssistantMessagePersisted: (tempId, persistedId) => {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === tempId ? { ...m, id: persistedId, status: 'sent' } : m
+                ),
+              }));
+            },
+            onStreamingChunk: (chunk) => {
+              set({ streamingContent: chunk });
+            },
+            onStreamingDone: () => {
+              set({ streamingContent: '' });
+            },
           },
-          text.trim() || undefined,
-          mode
+          tracker
         );
-
-        set({ streamingContent: '' });
-
-        set((state) => ({
-          messages: state.messages.map((m) =>
-            m.id === nextAssistantTempId ? { ...m, content: fullText } : m
-          ),
-        }));
-
-        const persistedAssistantId = await addChatMessage(uid, {
-          role: 'assistant',
-          content: fullText,
-          status: 'sent',
-          model: defaultModel,
-          createdAtMs: assistantMs,
-        });
-
-        set((state) => ({
-          messages: state.messages.map((m) =>
-            m.id === nextAssistantTempId
-              ? { ...m, id: persistedAssistantId, status: 'sent' }
-              : m
-          ),
-        }));
       } catch (error) {
-        const cleanupPaths = Array.from(uploadedStoragePaths).filter(
-          (path) => !persistedStoragePaths.has(path)
+        const cleanupPaths = Array.from(tracker.uploadedStoragePaths).filter(
+          (path) => !tracker.persistedStoragePaths.has(path)
         );
         if (cleanupPaths.length > 0) {
-          await Promise.all(cleanupPaths.map((path) => deleteChatImage(path)));
+          await Promise.allSettled(cleanupPaths.map((path) => deleteChatImage(path)));
         }
 
         console.error('Failed to send image message:', error);
         set((state) => ({
           streamingContent: '',
           messages: state.messages.map((message) => {
-            if (message.id === userTempId || message.id === assistantTempId) {
+            if (message.id === userTempId || message.id === tracker.assistantTempId) {
               return { ...message, status: 'error' };
             }
             return message;
@@ -790,8 +586,11 @@ export const useChatStore = create<ChatStore>((set, get) => {
         }));
         throw error;
       } finally {
-        if (processedResultObjectUrl && typeof URL !== 'undefined') {
-          URL.revokeObjectURL(processedResultObjectUrl);
+        if (tracker.processedResultObjectUrl && typeof URL !== 'undefined') {
+          URL.revokeObjectURL(tracker.processedResultObjectUrl);
+        }
+        if (shouldRevokeInputObjectUrl && typeof URL !== 'undefined') {
+          URL.revokeObjectURL(attachment.url);
         }
         set({ isSending: false });
       }
@@ -800,6 +599,17 @@ export const useChatStore = create<ChatStore>((set, get) => {
     consumePendingMessageAndSend: async () => {
       const pendingMessage = await loadPendingMessage();
       if (!pendingMessage) {
+        return;
+      }
+
+      const retryCount = pendingMessage._retryCount ?? 0;
+      if (retryCount >= MAX_PENDING_RETRIES) {
+        console.warn(
+          '[useChatStore] Pending message exceeded max retries, discarding:',
+          retryCount
+        );
+        await clearPendingMessage();
+        set({ error: 'Your pending message could not be sent after multiple attempts and has been discarded.' });
         return;
       }
 
@@ -816,8 +626,12 @@ export const useChatStore = create<ChatStore>((set, get) => {
           await get().sendMessage(pendingMessage.text);
         }
       } catch (error) {
-        await savePendingMessage(pendingMessage);
-        if (!isAuthRequiredError(error)) {
+        if (isAuthRequiredError(error)) {
+          // Auth errors: re-save without incrementing (user just needs to log in)
+          await savePendingMessage(pendingMessage);
+        } else {
+          // Non-auth errors: increment retry count
+          await savePendingMessage({ ...pendingMessage, _retryCount: retryCount + 1 });
           console.error('[useChatStore] consumePendingMessageAndSend failed:', error);
         }
       }

@@ -9,7 +9,7 @@ import {
 // ============================================================================
 
 interface ApiResponse<T> {
-  data: T;
+  data: T | null;
   success: boolean;
   error?: string;
 }
@@ -40,7 +40,7 @@ class ApiService {
       };
     } catch (error) {
       return {
-        data: null as unknown as TextResponse,
+        data: null,
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
