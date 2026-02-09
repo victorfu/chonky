@@ -7,9 +7,11 @@ export type ChatMessageStatus = 'pending' | 'sent' | 'error';
 
 export interface ChatMessageAttachment {
   type: 'image';
-  /** Firebase Storage download URL (persisted) or base64 data URL (before upload completes) */
+  /** Firebase Storage download URL (persisted) or local object URL (before upload completes) */
   url: string;
   mimeType: string;
+  /** Local-only image blob used for processing/upload before persistence. */
+  localBlob?: Blob;
   /** Firebase Storage path for cleanup/deletion */
   storagePath?: string;
 }
@@ -34,4 +36,3 @@ export interface ChatThreadMeta {
   createdAt?: string;
   updatedAt?: string;
 }
-

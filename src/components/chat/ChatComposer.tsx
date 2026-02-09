@@ -18,6 +18,8 @@ interface ChatComposerProps {
   onRemoveAttachment: () => void;
 }
 
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 export function ChatComposer({
   value,
   onChange,
@@ -39,8 +41,6 @@ export function ChatComposer({
     void onSubmit(value.trim());
   };
 
-  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
-
   const processFile = useCallback(
     (file: File) => {
       if (!file.type.startsWith('image/')) return;
@@ -48,15 +48,8 @@ export function ChatComposer({
         console.warn('[ChatComposer] Image too large:', file.size);
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        onAttach({ type: 'image', url: dataUrl, mimeType: file.type });
-      };
-      reader.onerror = () => {
-        console.error('[ChatComposer] Failed to read file:', reader.error);
-      };
-      reader.readAsDataURL(file);
+      const objectUrl = URL.createObjectURL(file);
+      onAttach({ type: 'image', url: objectUrl, mimeType: file.type, localBlob: file });
     },
     [onAttach]
   );

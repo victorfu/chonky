@@ -13,7 +13,7 @@ export interface RemoveBackgroundWorkerPreloadRequest {
 export interface RemoveBackgroundWorkerRunRequest {
   id: number;
   kind: 'remove-background';
-  imageBase64: string;
+  imageBuffer: ArrayBuffer;
   mimeType: string;
   maxInferenceLongEdge: number;
   config: RemoveBackgroundWorkerConfig;

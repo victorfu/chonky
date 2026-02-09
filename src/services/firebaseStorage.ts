@@ -17,7 +17,10 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; mimeType: string } {
   return { blob: new Blob([bytes], { type: mimeType }), mimeType };
 }
 
-async function toBlob(input: string): Promise<{ blob: Blob; mimeType: string }> {
+async function toBlob(input: string | Blob): Promise<{ blob: Blob; mimeType: string }> {
+  if (input instanceof Blob) {
+    return { blob: input, mimeType: input.type || 'image/png' };
+  }
   if (input.startsWith('blob:')) {
     const response = await fetch(input);
     const blob = await response.blob();
@@ -43,10 +46,10 @@ function mimeToExtension(mimeType: string): string {
 export async function uploadChatImage(
   uid: string,
   messageId: string,
-  dataUrl: string
+  input: string | Blob
 ): Promise<{ downloadUrl: string; storagePath: string }> {
   try {
-    const { blob, mimeType } = await toBlob(dataUrl);
+    const { blob, mimeType } = await toBlob(input);
     const ext = mimeToExtension(mimeType);
     const storagePath = `chat_images/${uid}/${messageId}.${ext}`;
     const storageRef = ref(storage, storagePath);

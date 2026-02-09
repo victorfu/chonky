@@ -29,6 +29,11 @@ type PendingRequest = {
   timeoutId: ReturnType<typeof setTimeout>;
 };
 
+type WorkerCallPayload = {
+  request: RemoveBackgroundWorkerRequest;
+  transferables?: Transferable[];
+};
+
 const pendingRequests = new Map<number, PendingRequest>();
 
 function getWorkerConfig(): RemoveBackgroundWorkerConfig {
@@ -47,6 +52,15 @@ function rejectAllPendingRequests(error: unknown) {
     reject(error);
   });
   pendingRequests.clear();
+}
+
+function resetWorker(error: unknown) {
+  rejectAllPendingRequests(error);
+  if (workerInstance) {
+    workerInstance.terminate();
+    workerInstance = null;
+  }
+  preloadPromise = null;
 }
 
 function createWorker(): Worker {
@@ -69,10 +83,13 @@ function createWorker(): Worker {
   worker.addEventListener('error', (event) => {
     const workerError = event.error ?? new Error(event.message || 'Background removal worker failed');
     console.error('[removeBackground] Worker error:', workerError);
-    rejectAllPendingRequests(workerError);
-    worker.terminate();
-    workerInstance = null;
-    preloadPromise = null;
+    resetWorker(workerError);
+  });
+
+  worker.addEventListener('messageerror', (event) => {
+    const workerError = new Error('Background removal worker message channel error');
+    console.error('[removeBackground] Worker messageerror:', workerError, event);
+    resetWorker(workerError);
   });
 
   return worker;
@@ -87,32 +104,41 @@ function getWorker(): Worker {
 }
 
 function callWorker(
-  buildRequest: (id: number, config: RemoveBackgroundWorkerConfig) => RemoveBackgroundWorkerRequest,
+  buildRequest: (id: number, config: RemoveBackgroundWorkerConfig) => WorkerCallPayload,
   timeoutMs: number
 ): Promise<RemoveBackgroundWorkerResponse> {
   const id = ++requestId;
   const config = getWorkerConfig();
-  const request = buildRequest(id, config);
+  const { request, transferables = [] } = buildRequest(id, config);
 
   return new Promise<RemoveBackgroundWorkerResponse>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
-      if (!pendingRequests.has(id)) return;
+      const pending = pendingRequests.get(id);
+      if (!pending) return;
+
       pendingRequests.delete(id);
+      clearTimeout(pending.timeoutId);
 
       console.error(`[removeBackground] Worker timed out after ${timeoutMs}ms for request ${id}`);
+      pending.reject(new Error(`Background removal worker timed out after ${timeoutMs}ms`));
 
-      if (workerInstance) {
-        workerInstance.terminate();
-        workerInstance = null;
-      }
-      preloadPromise = null;
-      rejectAllPendingRequests(new Error('Worker terminated due to timeout'));
-
-      reject(new Error(`Background removal worker timed out after ${timeoutMs}ms`));
+      resetWorker(new Error('Worker terminated due to timeout'));
     }, timeoutMs);
 
     pendingRequests.set(id, { resolve, reject, timeoutId });
-    getWorker().postMessage(request);
+
+    try {
+      if (transferables.length > 0) {
+        getWorker().postMessage(request, transferables);
+      } else {
+        getWorker().postMessage(request);
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      pendingRequests.delete(id);
+      reject(error);
+      resetWorker(error);
+    }
   });
 }
 
@@ -123,11 +149,16 @@ function toPipelineError(response: Extract<RemoveBackgroundWorkerResponse, { ok:
 
 export async function preloadBackgroundRemovalModel(): Promise<void> {
   if (!preloadPromise) {
-    preloadPromise = callWorker((id, config) => ({
-      id,
-      kind: 'preload',
-      config,
-    }), PRELOAD_TIMEOUT_MS)
+    preloadPromise = callWorker(
+      (id, config) => ({
+        request: {
+          id,
+          kind: 'preload',
+          config,
+        },
+      }),
+      PRELOAD_TIMEOUT_MS
+    )
       .then((response) => {
         if (!response.ok) {
           throw toPipelineError(response);
@@ -146,19 +177,26 @@ export async function preloadBackgroundRemovalModel(): Promise<void> {
 }
 
 export async function removeImageBackground(
-  imageBase64: string,
+  imageBlob: Blob,
   mimeType: string,
   maxInferenceLongEdge = HIGH_QUALITY_MAX_INFERENCE_LONG_EDGE
 ): Promise<RemoveBackgroundResult> {
   try {
-    const response = await callWorker((id, config) => ({
-      id,
-      kind: 'remove-background',
-      imageBase64,
-      mimeType,
-      maxInferenceLongEdge,
-      config,
-    }), BG_REMOVAL_TIMEOUT_MS);
+    const imageBuffer = await imageBlob.arrayBuffer();
+    const response = await callWorker(
+      (id, config) => ({
+        request: {
+          id,
+          kind: 'remove-background',
+          imageBuffer,
+          mimeType,
+          maxInferenceLongEdge,
+          config,
+        },
+        transferables: [imageBuffer],
+      }),
+      BG_REMOVAL_TIMEOUT_MS
+    );
 
     if (!response.ok) {
       throw toPipelineError(response);
@@ -188,11 +226,6 @@ export async function removeImageBackground(
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    if (workerInstance) {
-      workerInstance.terminate();
-      workerInstance = null;
-    }
-    rejectAllPendingRequests(new Error('Background removal worker disposed'));
-    preloadPromise = null;
+    resetWorker(new Error('Background removal worker disposed'));
   });
 }

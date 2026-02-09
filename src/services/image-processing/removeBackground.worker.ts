@@ -102,12 +102,8 @@ async function blobToImageBitmap(blob: Blob): Promise<ImageBitmap> {
   return createImageBitmap(blob);
 }
 
-async function decodeInputBlob(imageBase64: string, mimeType: string): Promise<Blob> {
-  const res = await fetch(`data:${mimeType};base64,${imageBase64}`);
-  if (!res.ok) {
-    throw new Error(`Failed to decode base64 image (status ${res.status})`);
-  }
-  return res.blob();
+function decodeInputBlob(imageBuffer: ArrayBuffer, mimeType: string): Blob {
+  return new Blob([imageBuffer], { type: mimeType });
 }
 
 function buildFailure(
@@ -128,7 +124,7 @@ async function processBackgroundRemoval(
   request: RemoveBackgroundWorkerRunRequest
 ): Promise<RemoveBackgroundWorkerResponse> {
   const start = performance.now();
-  const inputBlob = await decodeInputBlob(request.imageBase64, request.mimeType);
+  const inputBlob = decodeInputBlob(request.imageBuffer, request.mimeType);
   const inputBitmap = await blobToImageBitmap(inputBlob);
 
   let outputBitmap: ImageBitmap | null = null;

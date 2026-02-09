@@ -9,7 +9,6 @@ import {
   subscribeChatMessages,
 } from '@/services/firestoreChat';
 import { generateAssistantReply, streamImageReply } from '@/services/chatProvider';
-import { analyzeScreenshot, isImageMode } from '@/services/screenshotAnalysis';
 import { deleteChatImage, uploadChatImage } from '@/services/firebaseStorage';
 import { useAuthStore } from './useAuthStore';
 import { useSettingsStore } from './useSettingsStore';
@@ -17,6 +16,7 @@ import { useSettingsStore } from './useSettingsStore';
 const PENDING_CHAT_MESSAGE_KEY = 'pending-chat-message';
 const AUTH_REQUIRED_ERROR_CODE = 'AUTH_REQUIRED';
 const pendingChatStore = createStore('chonky-chat', 'pending');
+const DATA_URL_PATTERN = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
 
 type AuthRequiredError = Error & { code: typeof AUTH_REQUIRED_ERROR_CODE };
 type PendingChatMessage =
@@ -44,10 +44,97 @@ function isChatMessageAttachment(value: unknown): value is ChatMessageAttachment
     'mimeType' in value &&
     typeof (value as Record<string, unknown>).mimeType === 'string' &&
     (value as Record<string, unknown>).mimeType !== '' &&
+    (!('localBlob' in value) ||
+      (value as Record<string, unknown>).localBlob == null ||
+      (value as Record<string, unknown>).localBlob instanceof Blob) &&
     (!('storagePath' in value) ||
       (value as Record<string, unknown>).storagePath == null ||
       typeof (value as Record<string, unknown>).storagePath === 'string')
   );
+}
+
+function revokeLocalAttachmentObjectUrl(attachment: ChatMessageAttachment | null | undefined) {
+  if (!attachment?.localBlob || !attachment.url.startsWith('blob:') || typeof URL === 'undefined') {
+    return;
+  }
+  URL.revokeObjectURL(attachment.url);
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
+async function fetchImageBlob(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch attachment image (status ${response.status})`);
+  }
+  return response.blob();
+}
+
+async function attachmentToBlob(attachment: ChatMessageAttachment): Promise<Blob> {
+  if (attachment.localBlob instanceof Blob) {
+    return attachment.localBlob;
+  }
+
+  if (
+    attachment.url.startsWith('data:') ||
+    attachment.url.startsWith('blob:') ||
+    attachment.url.startsWith('http://') ||
+    attachment.url.startsWith('https://')
+  ) {
+    return fetchImageBlob(attachment.url);
+  }
+
+  const response = await fetch(`data:${attachment.mimeType};base64,${attachment.url}`);
+  if (!response.ok) {
+    throw new Error(`Failed to decode attachment base64 (status ${response.status})`);
+  }
+  return response.blob();
+}
+
+async function attachmentToInlineData(
+  attachment: ChatMessageAttachment
+): Promise<{ mimeType: string; base64Data: string }> {
+  if (attachment.localBlob instanceof Blob) {
+    return {
+      mimeType: attachment.localBlob.type || attachment.mimeType,
+      base64Data: arrayBufferToBase64(await attachment.localBlob.arrayBuffer()),
+    };
+  }
+
+  const dataUrlMatch = attachment.url.match(DATA_URL_PATTERN);
+  if (dataUrlMatch) {
+    return {
+      mimeType: dataUrlMatch[1],
+      base64Data: dataUrlMatch[2],
+    };
+  }
+
+  if (
+    attachment.url.startsWith('blob:') ||
+    attachment.url.startsWith('http://') ||
+    attachment.url.startsWith('https://')
+  ) {
+    const blob = await fetchImageBlob(attachment.url);
+    return {
+      mimeType: blob.type || attachment.mimeType,
+      base64Data: arrayBufferToBase64(await blob.arrayBuffer()),
+    };
+  }
+
+  return {
+    mimeType: attachment.mimeType,
+    base64Data: attachment.url,
+  };
 }
 
 function parsePendingMessage(raw: string): PendingChatMessage | null {
@@ -340,6 +427,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
     },
 
     setDraftAttachment: (attachment) => {
+      const previousAttachment = get().draftAttachment;
+      if (previousAttachment !== attachment) {
+        revokeLocalAttachmentObjectUrl(previousAttachment);
+      }
       set({ draftAttachment: attachment });
     },
 
@@ -468,6 +559,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       const uploadedStoragePaths = new Set<string>();
       const persistedStoragePaths = new Set<string>();
       let processedResultObjectUrl: string | null = null;
+      let shouldRevokeInputObjectUrl = attachment.localBlob instanceof Blob && attachment.url.startsWith('blob:');
 
       const content = text.trim() || (mode ? `[${mode}]` : '[image]');
 
@@ -494,7 +586,11 @@ export const useChatStore = create<ChatStore>((set, get) => {
 
       try {
         // Upload image to Firebase Storage
-        const { downloadUrl, storagePath } = await uploadChatImage(uid, userTempId, attachment.url);
+        const { downloadUrl, storagePath } = await uploadChatImage(
+          uid,
+          userTempId,
+          attachment.localBlob ?? attachment.url
+        );
         uploadedStoragePaths.add(storagePath);
         const persistedAttachment: ChatMessageAttachment = {
           type: 'image',
@@ -509,6 +605,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
             m.id === userTempId ? { ...m, attachment: persistedAttachment } : m
           ),
         }));
+        if (shouldRevokeInputObjectUrl && typeof URL !== 'undefined') {
+          URL.revokeObjectURL(attachment.url);
+          shouldRevokeInputObjectUrl = false;
+        }
 
         // Persist user message to Firestore
         const persistedUserMessageId = await addChatMessage(uid, {
@@ -530,12 +630,17 @@ export const useChatStore = create<ChatStore>((set, get) => {
         }));
 
         // Handle remove-bg locally
-        if (mode && isImageMode(mode)) {
-          const dataUrlMatch = attachment.url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-          const mimeType = dataUrlMatch?.[1] ?? attachment.mimeType;
-          const base64Data = dataUrlMatch?.[2] ?? attachment.url;
-
-          const result = await analyzeScreenshot(base64Data, mode, defaultModel, language, undefined, mimeType);
+        if (mode === 'remove-bg') {
+          const sourceBlob = await attachmentToBlob(attachment);
+          const { analyzeScreenshot } = await import('@/services/screenshotAnalysis');
+          const result = await analyzeScreenshot(
+            sourceBlob,
+            mode,
+            defaultModel,
+            language,
+            undefined,
+            sourceBlob.type || attachment.mimeType
+          );
 
           const assistantMs = Date.now();
           const nextAssistantTempId = `local-assistant-${assistantMs}`;
@@ -609,9 +714,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         }
 
         // Streaming text analysis for text modes / custom prompt
-        const dataUrlMatch = attachment.url.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-        const mimeType = dataUrlMatch?.[1] ?? attachment.mimeType;
-        const base64Data = dataUrlMatch?.[2] ?? attachment.url;
+        const { mimeType, base64Data } = await attachmentToInlineData(attachment);
 
         const assistantMs = Date.now();
         const nextAssistantTempId = `local-assistant-${assistantMs}`;

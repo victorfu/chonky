@@ -3,7 +3,6 @@ import { ai } from './firebase';
 import type { ModelType, Language } from '@/types';
 import type { AnalysisMode, AnalysisResultType } from '@/types/screenshot';
 import i18n from '@/i18n';
-import { removeImageBackground } from './image-processing/removeBackground';
 
 interface Size {
   width: number;
@@ -24,6 +23,7 @@ export interface ImageAnalysisResult {
 }
 
 const IMAGE_MODES: AnalysisMode[] = ['remove-bg'];
+const DATA_URL_PATTERN = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
 
 export function isImageMode(mode: AnalysisMode): boolean {
   return IMAGE_MODES.includes(mode);
@@ -48,8 +48,96 @@ function isImagePipelineError(error: unknown): error is { code: unknown } {
   );
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    const chunk = bytes.subarray(offset, offset + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
+}
+
+async function blobToBase64(blob: Blob): Promise<string> {
+  return arrayBufferToBase64(await blob.arrayBuffer());
+}
+
+async function fetchBlob(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image blob (status ${response.status})`);
+  }
+  return response.blob();
+}
+
+async function resolveInlineData(
+  imageInput: string | Blob,
+  fallbackMimeType: string
+): Promise<{ data: string; mimeType: string }> {
+  if (imageInput instanceof Blob) {
+    return {
+      data: await blobToBase64(imageInput),
+      mimeType: imageInput.type || fallbackMimeType,
+    };
+  }
+
+  const dataUrlMatch = imageInput.match(DATA_URL_PATTERN);
+  if (dataUrlMatch) {
+    return {
+      mimeType: dataUrlMatch[1],
+      data: dataUrlMatch[2],
+    };
+  }
+
+  if (
+    imageInput.startsWith('blob:') ||
+    imageInput.startsWith('http://') ||
+    imageInput.startsWith('https://')
+  ) {
+    const blob = await fetchBlob(imageInput);
+    return {
+      data: await blobToBase64(blob),
+      mimeType: blob.type || fallbackMimeType,
+    };
+  }
+
+  return {
+    data: imageInput,
+    mimeType: fallbackMimeType,
+  };
+}
+
+async function resolveImageBlob(imageInput: string | Blob, fallbackMimeType: string): Promise<Blob> {
+  if (imageInput instanceof Blob) {
+    return imageInput;
+  }
+
+  const dataUrlMatch = imageInput.match(DATA_URL_PATTERN);
+  if (dataUrlMatch) {
+    return fetchBlob(imageInput);
+  }
+
+  if (
+    imageInput.startsWith('blob:') ||
+    imageInput.startsWith('http://') ||
+    imageInput.startsWith('https://')
+  ) {
+    return fetchBlob(imageInput);
+  }
+
+  const response = await fetch(`data:${fallbackMimeType};base64,${imageInput}`);
+  if (!response.ok) {
+    throw new Error(`Failed to decode base64 image (status ${response.status})`);
+  }
+
+  return response.blob();
+}
+
 async function analyzeImageMode(
-  imageBase64: string,
+  imageInput: string | Blob,
   mode: AnalysisMode,
   mimeType: string,
   language: Language
@@ -65,7 +153,9 @@ async function analyzeImageMode(
 
   try {
     if (mode === 'remove-bg') {
-      const result = await removeImageBackground(imageBase64, mimeType);
+      const imageBlob = await resolveImageBlob(imageInput, mimeType);
+      const { removeImageBackground } = await import('./image-processing/removeBackground');
+      const result = await removeImageBackground(imageBlob, imageBlob.type || mimeType);
 
       return {
         text: '',
@@ -92,15 +182,15 @@ async function analyzeImageMode(
 
 /**
  * Analyze a screenshot using Gemini Vision (text modes) and local models (image modes).
- * @param imageBase64 - Base64 encoded image data (without data URL prefix)
+ * @param imageInput - Base64 string, data URL, object URL, or Blob image source
  * @param mode - Analysis mode
  * @param model - Model to use for text modes
  * @param language - Target language for the analysis
  * @param onChunk - Callback for streaming chunks
- * @param mimeType - Original image mime type
+ * @param mimeType - Fallback image mime type
  */
 export async function analyzeScreenshot(
-  imageBase64: string,
+  imageInput: string | Blob,
   mode: AnalysisMode,
   model: ModelType,
   language: Language = 'zh-TW',
@@ -108,11 +198,12 @@ export async function analyzeScreenshot(
   mimeType = 'image/png'
 ): Promise<ImageAnalysisResult> {
   if (isImageMode(mode)) {
-    return analyzeImageMode(imageBase64, mode, mimeType, language);
+    return analyzeImageMode(imageInput, mode, mimeType, language);
   }
 
   try {
     const geminiModel = getGenerativeModel(ai, { model });
+    const inlineData = await resolveInlineData(imageInput, mimeType);
 
     // Get localized prompt using i18n
     const instruction = i18n.t('screenshot.prompts.instruction', { lng: language });
@@ -125,8 +216,8 @@ export async function analyzeScreenshot(
       { text: prompt },
       {
         inlineData: {
-          mimeType,
-          data: imageBase64,
+          mimeType: inlineData.mimeType,
+          data: inlineData.data,
         },
       },
     ];

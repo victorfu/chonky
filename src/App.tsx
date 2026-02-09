@@ -57,8 +57,6 @@ function App() {
           <Route element={<MainLayout />}>
             {/* Homepage (public) */}
             <Route index element={<ChatHomePage />} />
-            <Route path="analyze" element={<Navigate to="/" replace />} />
-
             {/* Protected routes */}
             <Route
               element={
