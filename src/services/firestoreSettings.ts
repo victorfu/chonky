@@ -92,6 +92,16 @@ export function normalizeUserSettings(settings: Partial<UserSettings> | null | u
           ? next.chat.sendWithEnter
           : DEFAULT_SETTINGS.chat.sendWithEnter,
     },
+    search: {
+      enableAIRanking:
+        typeof next.search?.enableAIRanking === 'boolean'
+          ? next.search.enableAIRanking
+          : DEFAULT_SETTINGS.search.enableAIRanking,
+      maxResults:
+        typeof next.search?.maxResults === 'number'
+          ? next.search.maxResults
+          : DEFAULT_SETTINGS.search.maxResults,
+    },
     profile: {
       fullName: normalizeString(next.profile?.fullName, DEFAULT_SETTINGS.profile.fullName),
       displayName: normalizeString(

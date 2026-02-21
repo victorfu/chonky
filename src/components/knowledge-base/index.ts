@@ -1,2 +1,3 @@
-// Knowledge base component exports will be added as components are created
-export {};
+export { KnowledgeBasePage } from './KnowledgeBasePage';
+export { KnowledgeCardForm } from './KnowledgeCardForm';
+export { KnowledgeCardListItem } from './KnowledgeCardListItem';

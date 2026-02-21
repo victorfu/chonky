@@ -18,8 +18,8 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onC
 }
 
 const sizeClasses = {
-  xs: 'h-7 text-xs',
-  sm: 'h-8 text-sm',
+  xs: 'h-8 text-xs',
+  sm: 'h-9 text-sm',
   md: 'h-10 text-sm',
   lg: 'h-12 text-base',
 };
@@ -34,7 +34,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={cn(
-          'flex rounded-md border border-input bg-background px-3 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex rounded-[6px] border border-border-hairline bg-background/50 px-3 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50',
           sizeClasses[size],
           !inline && 'w-full',
           error && 'border-destructive focus-visible:ring-destructive',

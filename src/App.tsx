@@ -2,10 +2,10 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { ChatHomePage } from '@/components/chat/ChatHomePage';
+import { SearchHomePage } from '@/components/search/SearchHomePage';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useChatStore } from '@/stores/useChatStore';
+import { useKnowledgeStore } from '@/stores/useKnowledgeStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 
 const LazyLoginPage = lazy(() =>
@@ -13,6 +13,11 @@ const LazyLoginPage = lazy(() =>
 );
 const LazySettingsPage = lazy(() =>
   import('@/components/settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))
+);
+const LazyKnowledgeBasePage = lazy(() =>
+  import('@/components/knowledge-base/KnowledgeBasePage').then((m) => ({
+    default: m.KnowledgeBasePage,
+  }))
 );
 
 function RouteFallback() {
@@ -25,22 +30,20 @@ function RouteFallback() {
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const initAuth = useAuthStore((state) => state.initialize);
-  const initChat = useChatStore((state) => state.initialize);
+  const initKnowledge = useKnowledgeStore((state) => state.initialize);
   const initSettings = useSettingsStore((state) => state.initialize);
 
   useEffect(() => {
-    // Initialize Firebase Auth (returns unsubscribe function)
     const unsubscribeAuth = initAuth();
-    const unsubscribeChat = initChat();
+    const unsubscribeKnowledge = initKnowledge();
     const unsubscribeSettings = initSettings();
 
-    // Cleanup: unsubscribe listeners on unmount
     return () => {
       unsubscribeAuth();
-      unsubscribeChat();
+      unsubscribeKnowledge();
       unsubscribeSettings();
     };
-  }, [initAuth, initChat, initSettings]);
+  }, [initAuth, initKnowledge, initSettings]);
 
   return <>{children}</>;
 }
@@ -53,11 +56,11 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Suspense fallback={<RouteFallback />}><LazyLoginPage /></Suspense>} />
 
-          {/* App routes */}
+          {/* Public search homepage — no sidebar, no auth */}
+          <Route index element={<SearchHomePage />} />
+
+          {/* Admin routes — with sidebar + auth */}
           <Route element={<MainLayout />}>
-            {/* Homepage (public) */}
-            <Route index element={<ChatHomePage />} />
-            {/* Protected routes */}
             <Route
               element={
                 <AuthGuard>
@@ -65,7 +68,15 @@ function App() {
                 </AuthGuard>
               }
             >
-              <Route path="settings" element={<Suspense fallback={<RouteFallback />}><LazySettingsPage /></Suspense>} />
+              <Route
+                path="admin/knowledge-base"
+                element={<Suspense fallback={<RouteFallback />}><LazyKnowledgeBasePage /></Suspense>}
+              />
+              <Route
+                path="admin/settings"
+                element={<Suspense fallback={<RouteFallback />}><LazySettingsPage /></Suspense>}
+              />
+              <Route path="admin" element={<Navigate to="/admin/knowledge-base" replace />} />
             </Route>
           </Route>
 

@@ -58,7 +58,7 @@ const toastTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 export const useUIStore = create<UIStore>((set) => ({
   // Sidebar
-  isSidebarCollapsed: true,
+  isSidebarCollapsed: false,
   isMobileSidebarOpen: false,
   toggleSidebar: () => {
     set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));

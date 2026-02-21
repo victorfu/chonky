@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { SettingsTabs, type SettingsTab } from './SettingsTabs';
 import { GeneralSettings } from './GeneralSettings';
 import { AppearanceSettings } from './AppearanceSettings';
 import { ProfileSettings } from './ProfileSettings';
 
 export function SettingsPage() {
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
 
   const renderContent = () => {
@@ -23,16 +21,19 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="border-b border-border px-4 sm:px-6 py-4 bg-background">
-        <h1 className="text-xl sm:text-2xl font-bold mb-4">{t('settings.title')}</h1>
+    <div className="flex h-full flex-col gap-4">
+      <div className="glass-regular rounded-2xl p-2 sm:p-3">
         <SettingsTabs activeTab={activeTab} onChange={setActiveTab} />
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        <div className="max-w-2xl">
+      <div className="flex-1 overflow-y-auto rounded-2xl border border-border-hairline/80 bg-background-elevated/65 p-4 shadow-card sm:p-6">
+        <div
+          id={`settings-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`settings-tab-${activeTab}`}
+          className="mx-auto w-full max-w-3xl"
+        >
           {renderContent()}
         </div>
       </div>

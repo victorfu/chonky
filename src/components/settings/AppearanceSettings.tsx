@@ -19,8 +19,8 @@ export function AppearanceSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <h3 className="font-semibold mb-4">{t('settings.appearance.theme')}</h3>
+      <Card surface="surface">
+        <h3 className="mb-4 text-base font-semibold">{t('settings.appearance.theme')}</h3>
         <div className="grid grid-cols-3 gap-3">
           {themeOptions.map((option) => {
             const Icon = option.icon;
@@ -39,37 +39,25 @@ export function AppearanceSettings() {
                   });
                 }}
                 className={cn(
-                  'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
+                  'flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-all motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                   isSelected
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
+                    ? 'glass-clear border-accent/45 text-accent'
+                    : 'border-border-hairline bg-background-elevated/60 hover:border-accent/35'
                 )}
               >
-                <Icon className={cn('w-6 h-6', isSelected && 'text-primary')} />
-                <span className={cn('text-sm font-medium', isSelected && 'text-primary')}>
+                <Icon className={cn('h-6 w-6', isSelected && 'text-accent')} />
+                <span className={cn('text-sm font-medium', isSelected && 'text-accent')}>
                   {t(option.labelKey)}
                 </span>
               </button>
             );
           })}
         </div>
-        <p className="text-sm text-muted-foreground mt-4">
+        <p className="mt-4 text-sm text-muted-foreground">
           {theme === 'auto'
             ? t('settings.appearance.currentThemeAuto', { theme: resolvedTheme })
             : t('settings.appearance.currentTheme', { theme })}
         </p>
-      </Card>
-
-      <Card>
-        <h3 className="font-semibold mb-4">{t('settings.appearance.preview')}</h3>
-        <div className="p-4 bg-muted/50 rounded-lg">
-          <p className="mb-2">
-            {t('settings.appearance.previewText')}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {t('settings.appearance.previewSmallText')}
-          </p>
-        </div>
       </Card>
     </div>
   );

@@ -16,9 +16,9 @@ export function Tooltip({ content, position = 'top', children, className }: Tool
       </TooltipPrimitive.Trigger>
       <TooltipPrimitive.Content
         side={position}
-        sideOffset={4}
+        sideOffset={8}
         className={cn(
-          'z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95',
+          'glass-floating z-50 overflow-hidden rounded-[10px] px-3 py-1.5 text-xs text-popover-foreground shadow-dropdown motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95',
         )}
       >
         {content}

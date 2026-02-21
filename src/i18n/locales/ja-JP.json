@@ -76,9 +76,6 @@
       "light": "ライト",
       "dark": "ダーク",
       "system": "システム",
-      "preview": "プレビュー",
-      "previewText": "現在の設定でテキストがどのように表示されるかのプレビューです。",
-      "previewSmallText": "説明文などの小さなテキストは比例してスケールします。",
       "currentThemeAuto": "システム設定に基づいて{{theme}}テーマを使用中",
       "currentTheme": "{{theme}}テーマを使用中"
     },
@@ -116,30 +113,59 @@
     "placeholder": "コマンドを検索...",
     "actions": "アクション",
     "navigation": "ナビゲーション",
-    "goToChat": "チャットへ移動",
+    "goToKnowledgeBase": "ナレッジベースへ移動",
     "goToSettings": "設定へ移動",
     "noResults": "結果が見つかりません"
   },
   "nav": {
-    "chat": "チャット",
+    "knowledgeBase": "ナレッジベース",
     "settings": "設定"
   },
-  "chatHome": {
-    "threadLabel": "検索結果",
-    "clearConversation": "クリア",
-    "loading": "読み込み中...",
-    "errorPrefix": "エラー",
-    "roles": {
-      "user": "あなた",
-      "assistant": "アシスタント"
+  "search": {
+    "placeholder": "ナレッジベースを検索...",
+    "tagline": "ナレッジベースを検索",
+    "searching": "検索中...",
+    "noResults": "結果が見つかりません",
+    "noResultsDesc": "別のキーワードを試すか、検索範囲を広げてください。",
+    "resultCount": "{{count}} 件の結果",
+    "viewMore": "詳細を表示",
+    "collapse": "折りたたむ"
+  },
+  "knowledgeBase": {
+    "title": "ナレッジベース",
+    "addCard": "カードを追加",
+    "editCard": "カードを編集",
+    "deleteCard": "カードを削除",
+    "publish": "公開",
+    "unpublish": "非公開にする",
+    "deleteConfirm": {
+      "title": "カードを削除",
+      "message": "このカードを削除してもよろしいですか？この操作は元に戻せません。"
     },
-    "status": {
-      "pending": "検索中...",
-      "error": "失敗"
+    "form": {
+      "title": "タイトル",
+      "description": "説明",
+      "content": "内容",
+      "category": "カテゴリ",
+      "tags": "タグ",
+      "tagsPlaceholder": "タグを入力してEnterを押してください",
+      "image": "画像URL",
+      "status": "ステータス",
+      "draft": "下書き",
+      "published": "公開済み",
+      "publishedDesc": "検索結果に表示されます",
+      "draftDesc": "検索結果に表示されません",
+      "metadata": "メタデータ",
+      "addMetadata": "フィールドを追加"
     },
-    "composer": {
-      "placeholder": "質問を入力してください..."
-    }
+    "emptyState": {
+      "title": "カードがありません",
+      "description": "最初のナレッジカードを作成して始めましょう。"
+    },
+    "saveSuccess": "カードを保存しました",
+    "saveError": "カードの保存に失敗しました",
+    "deleteSuccess": "カードを削除しました",
+    "deleteError": "カードの削除に失敗しました"
   },
   "errors": {
     "generic": "エラーが発生しました",

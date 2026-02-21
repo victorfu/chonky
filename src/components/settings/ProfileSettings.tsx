@@ -55,10 +55,10 @@ export function ProfileSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <h3 className="font-semibold mb-4">{t('settings.profile.profileInfo')}</h3>
+      <Card surface="surface">
+        <h3 className="mb-4 text-base font-semibold">{t('settings.profile.profileInfo')}</h3>
 
-        <div className="flex items-center gap-4 mb-6">
+        <div className="mb-6 flex items-center gap-4">
           <Avatar
             src={user?.avatarUrl}
             name={user?.displayName || t('settings.profile.unknown')}
@@ -98,18 +98,18 @@ export function ProfileSettings() {
         </div>
       </Card>
 
-      <Card>
-        <h3 className="font-semibold mb-4">{t('settings.profile.account')}</h3>
+      <Card surface="surface">
+        <h3 className="mb-4 text-base font-semibold">{t('settings.profile.account')}</h3>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center justify-between rounded-xl border border-border-hairline bg-background-elevated/60 p-3">
             <div>
               <p className="font-medium">{t('settings.profile.accountId')}</p>
               <p className="text-sm text-muted-foreground font-mono">{user?.id}</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center justify-between rounded-xl border border-border-hairline bg-background-elevated/60 p-3">
             <div>
               <p className="font-medium">{t('settings.profile.memberSince')}</p>
               <p className="text-sm text-muted-foreground">
@@ -122,10 +122,8 @@ export function ProfileSettings() {
         </div>
       </Card>
 
-      <Card className="border-destructive/20">
-        <h3 className="font-semibold mb-4 text-destructive">{t('settings.profile.dangerZone')}</h3>
-
-        <div className="flex items-center justify-between p-3 bg-destructive/5 rounded-lg">
+      <Card surface="surface">
+        <div className="flex items-center justify-between rounded-xl border border-border-hairline bg-background-elevated/60 p-3">
           <div>
             <p className="font-medium">{t('settings.profile.logOut')}</p>
             <p className="text-sm text-muted-foreground">
@@ -133,7 +131,7 @@ export function ProfileSettings() {
             </p>
           </div>
           <Button
-            variant="danger"
+            variant="secondary"
             size="sm"
             leftIcon={<LogOut className="w-4 h-4" />}
             onClick={() => setIsLogoutOpen(true)}
@@ -150,7 +148,7 @@ export function ProfileSettings() {
         title={t('settings.profile.logOutConfirm.title')}
         message={t('settings.profile.logOutConfirm.message')}
         confirmText={t('settings.profile.logOut')}
-        variant="danger"
+        variant="default"
         loading={isLoggingOut}
       />
     </div>

@@ -48,13 +48,13 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const getReturnPath = (from: unknown) => {
-    if (!from) return '/';
+    if (!from) return '/admin/knowledge-base';
     if (typeof from === 'string') return from;
     if (typeof from === 'object' && 'pathname' in from) {
       const loc = from as Location;
-      return `${loc.pathname ?? ''}${loc.search ?? ''}${loc.hash ?? ''}` || '/';
+      return `${loc.pathname ?? ''}${loc.search ?? ''}${loc.hash ?? ''}` || '/admin/knowledge-base';
     }
-    return '/';
+    return '/admin/knowledge-base';
   };
 
   const handleGoogleSignIn = async () => {
@@ -75,20 +75,27 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-8">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            'radial-gradient(80% 70% at 15% 0%, color-mix(in oklch, var(--accent) 16%, transparent), transparent 58%), radial-gradient(80% 70% at 85% 0%, color-mix(in oklch, var(--info) 16%, transparent), transparent 58%)',
+        }}
+      />
+      <div className="relative w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <div className="mb-4 flex justify-center">
             <Logo size="lg" />
           </div>
-          <h1 className="text-2xl font-bold">{t('auth.welcome', { appName })}</h1>
-          <p className="text-muted-foreground mt-2">{t('auth.tagline')}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('auth.welcome', { appName })}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t('auth.tagline')}</p>
         </div>
 
-        <div className="bg-background rounded-lg shadow-card p-6">
+        <div className="glass-floating rounded-2xl p-6">
           {/* Error message */}
           {error && (
-            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+            <div className="mb-4 rounded-[10px] border border-destructive/25 bg-destructive/12 px-3 py-2.5 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -98,19 +105,18 @@ export function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-border rounded-lg bg-background hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-[10px] border border-border-hairline bg-background-elevated/80 px-4 text-sm font-medium shadow-sm transition-all motion-safe:duration-200 hover:bg-background-elevated disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]"
           >
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : (
               <GoogleIcon />
             )}
-            <span className="text-sm font-medium">
+            <span>
               {t('auth.signInWithGoogle')}
             </span>
           </button>
         </div>
-
       </div>
     </div>
   );

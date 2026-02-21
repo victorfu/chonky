@@ -49,6 +49,11 @@ export interface ChatSettings {
   sendWithEnter: boolean;
 }
 
+export interface SearchSettings {
+  enableAIRanking: boolean;
+  maxResults: number;
+}
+
 export interface ProfileSettings {
   fullName: string;
   displayName: string;
@@ -60,6 +65,7 @@ export interface UserSettings {
   general: GeneralSettings;
   appearance: AppearanceSettings;
   chat: ChatSettings;
+  search: SearchSettings;
   profile: ProfileSettings;
 }
 
@@ -74,6 +80,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
   chat: {
     enableStreaming: true,
     sendWithEnter: true,
+  },
+  search: {
+    enableAIRanking: true,
+    maxResults: 20,
   },
   profile: {
     fullName: '',

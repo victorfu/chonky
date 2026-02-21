@@ -37,9 +37,9 @@ export function Dropdown({ trigger, items, position = 'bottom-end', className }:
         <DropdownMenuPrimitive.Content
           side={sideMap[position]}
           align={alignMap[position]}
-          sideOffset={4}
+          sideOffset={8}
           className={cn(
-            'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-dropdown animate-in fade-in-0 zoom-in-95',
+            'glass-floating z-50 min-w-[10rem] overflow-hidden rounded-xl p-1 text-popover-foreground shadow-dropdown motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95',
             className
           )}
         >
@@ -52,7 +52,7 @@ export function Dropdown({ trigger, items, position = 'bottom-end', className }:
                 disabled={item.disabled}
                 onSelect={item.onClick}
                 className={cn(
-                  'relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                  'relative flex cursor-pointer select-none items-center gap-2 rounded-[8px] px-2.5 py-2 text-sm outline-none transition-colors motion-safe:duration-200 focus:bg-accent/20 focus:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                   item.danger && 'text-destructive focus:bg-destructive/10 focus:text-destructive'
                 )}
               >

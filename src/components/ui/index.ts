@@ -31,3 +31,4 @@ export { Dropdown } from './Dropdown';
 
 // Specialized
 export { SearchInput } from './SearchInput';
+export type { GlassVariant } from './glass';

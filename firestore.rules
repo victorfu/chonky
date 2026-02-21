@@ -6,12 +6,14 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /user_chats/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      match /messages/{messageId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
+    match /knowledge_cards/{cardId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.createdBy == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.createdBy == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.createdBy == request.auth.uid;
     }
 
     match /{document=**} {

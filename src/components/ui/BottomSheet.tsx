@@ -47,19 +47,19 @@ export function BottomSheet({ isOpen, onClose, title, children, showCloseButton 
 
   return createPortal(
     <div className="fixed inset-0 z-50 lg:hidden">
-      <div className={cn('absolute inset-0 bg-black/50 transition-opacity duration-300', isOpen ? 'opacity-100' : 'opacity-0')} onClick={onClose} />
+      <div className={cn('absolute inset-0 bg-black/35 backdrop-blur-[2px] transition-opacity duration-300', isOpen ? 'opacity-100' : 'opacity-0')} onClick={onClose} />
       <div
         ref={sheetRef}
-        className={cn('absolute bottom-0 left-0 right-0 bg-background rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out', isOpen ? 'translate-y-0' : 'translate-y-full')}
+        className={cn('glass-floating absolute bottom-0 left-0 right-0 rounded-t-2xl border-x border-t border-border-hairline shadow-floating transform transition-transform duration-300 ease-out', isOpen ? 'translate-y-0' : 'translate-y-full')}
         style={{ maxHeight: `${maxHeight}vh` }}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
         <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 bg-muted rounded-full" />
+          <div className="h-1 w-10 rounded-full bg-muted-foreground/35" />
         </div>
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-4 pb-3 border-b">
-            <h3 className="text-lg font-semibold">{title}</h3>
+          <div className="flex items-center justify-between border-b border-border-hairline px-4 pb-3">
+            <h3 className="text-base font-semibold">{title}</h3>
             {showCloseButton && (
               <IconButton icon={<X className="w-5 h-5" />} variant="ghost" size="sm" onClick={onClose} aria-label="Close" />
             )}

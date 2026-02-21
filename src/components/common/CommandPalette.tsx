@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  MessageSquareText,
+  Database,
   Settings,
   Search,
 } from 'lucide-react';
@@ -32,17 +32,17 @@ export function CommandPalette() {
   const commands: CommandItem[] = useMemo(
     () => [
       {
-        id: 'nav-chat',
-        title: t('commandPalette.goToChat', 'Go to Chat'),
-        icon: <MessageSquareText className="w-4 h-4" />,
-        action: () => navigate('/'),
+        id: 'nav-kb',
+        title: t('commandPalette.goToKnowledgeBase', 'Go to Knowledge Base'),
+        icon: <Database className="w-4 h-4" />,
+        action: () => navigate('/admin/knowledge-base'),
         category: t('commandPalette.navigation'),
       },
-{
+      {
         id: 'nav-settings',
         title: t('commandPalette.goToSettings'),
         icon: <Settings className="w-4 h-4" />,
-        action: () => navigate('/settings'),
+        action: () => navigate('/admin/settings'),
         category: t('commandPalette.navigation'),
       },
     ],

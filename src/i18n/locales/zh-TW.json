@@ -32,7 +32,7 @@
   },
   "auth": {
     "welcome": "歡迎使用 {{appName}}",
-    "tagline": "面向 AI Agents 的通用工作平台",
+    "tagline": "管理介面",
     "cloudSyncNote": "登入後，您的設定會同步儲存至雲端",
     "errors": {
       "operationNotAllowed": "此操作不被允許",
@@ -50,13 +50,13 @@
     "tabs": {
       "general": "一般",
       "appearance": "外觀",
-      "profile": "個人檔案"
+      "profile": "帳號"
     },
     "general": {
       "languageRegion": "語言與地區",
       "language": "語言",
-      "profileSettings": "個人檔案設定",
-      "profileSettingsDesc": "在「個人檔案」分頁中更新您的個人資料。",
+      "profileSettings": "帳號設定",
+      "profileSettingsDesc": "在「帳號」分頁中更新您的個人資料。",
       "cloudSyncTitle": "雲端同步",
       "cloudSyncDesc": "您的設定會儲存，並在已登入裝置間同步。",
       "updateError": "更新設定失敗",
@@ -76,9 +76,6 @@
       "light": "淺色",
       "dark": "深色",
       "system": "系統",
-      "preview": "預覽",
-      "previewText": "這是文字在目前設定下的顯示預覽。",
-      "previewSmallText": "較小的文字（如說明文字）會按比例縮放。",
       "currentThemeAuto": "目前根據系統偏好使用 {{theme}} 主題",
       "currentTheme": "使用 {{theme}} 主題"
     },
@@ -116,30 +113,59 @@
     "placeholder": "搜尋指令...",
     "actions": "動作",
     "navigation": "導覽",
-    "goToChat": "前往對話首頁",
+    "goToKnowledgeBase": "前往知識庫",
     "goToSettings": "前往設定",
     "noResults": "找不到結果"
   },
   "nav": {
-    "chat": "對話",
+    "knowledgeBase": "知識庫",
     "settings": "設定"
   },
-  "chatHome": {
-    "threadLabel": "查詢結果",
-    "clearConversation": "清除",
-    "loading": "載入中...",
-    "errorPrefix": "錯誤",
-    "roles": {
-      "user": "你",
-      "assistant": "助手"
+  "search": {
+    "placeholder": "搜尋知識庫...",
+    "tagline": "搜尋我們的知識庫",
+    "searching": "搜尋中...",
+    "noResults": "找不到結果",
+    "noResultsDesc": "請嘗試不同的關鍵字或擴大搜尋範圍。",
+    "resultCount": "找到 {{count}} 筆結果",
+    "viewMore": "查看詳情",
+    "collapse": "收合"
+  },
+  "knowledgeBase": {
+    "title": "知識庫",
+    "addCard": "新增卡片",
+    "editCard": "編輯卡片",
+    "deleteCard": "刪除卡片",
+    "publish": "發佈",
+    "unpublish": "取消發佈",
+    "deleteConfirm": {
+      "title": "刪除卡片",
+      "message": "確定要刪除這張卡片嗎？此操作無法復原。"
     },
-    "status": {
-      "pending": "查詢中...",
-      "error": "查詢失敗"
+    "form": {
+      "title": "標題",
+      "description": "描述",
+      "content": "內容",
+      "category": "分類",
+      "tags": "標籤",
+      "tagsPlaceholder": "輸入標籤後按 Enter",
+      "image": "圖片網址",
+      "status": "狀態",
+      "draft": "草稿",
+      "published": "已發佈",
+      "publishedDesc": "在搜尋結果中顯示",
+      "draftDesc": "不會在搜尋結果中顯示",
+      "metadata": "附加資訊",
+      "addMetadata": "新增欄位"
     },
-    "composer": {
-      "placeholder": "輸入你的問題..."
-    }
+    "emptyState": {
+      "title": "尚無卡片",
+      "description": "建立第一張知識卡片以開始使用。"
+    },
+    "saveSuccess": "卡片儲存成功",
+    "saveError": "儲存卡片失敗",
+    "deleteSuccess": "卡片刪除成功",
+    "deleteError": "刪除卡片失敗"
   },
   "errors": {
     "generic": "發生錯誤",

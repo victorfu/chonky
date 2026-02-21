@@ -1,0 +1,109 @@
+/* src/styles/tokens.css */
+
+:root {
+  /* Light Theme */
+  --background: oklch(0.985 0 0);
+  --background-elevated: oklch(0.996 0 0);
+  --sidebar-bg: oklch(0.97 0 0 / 90%);
+  --card: oklch(1 0 0 / 72%);
+  --accent: oklch(0.6 0.2 250);
+  --accent-tint: oklch(0.6 0.2 250 / 10%);
+  --border-hairline: oklch(0 0 0 / 8%);
+  --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.65 0.2 145);
+  --warning: oklch(0.78 0.16 86);
+  --info: oklch(0.66 0.16 250);
+
+  /* Liquid Glass tokens */
+  --glass-regular-bg: oklch(1 0 0 / 62%);
+  --glass-clear-bg: oklch(1 0 0 / 40%);
+  --glass-floating-bg: oklch(1 0 0 / 74%);
+  --glass-sidebar-bg: oklch(0.975 0 0 / 84%);
+  --glass-toolbar-bg: oklch(0.99 0 0 / 76%);
+  --glass-border: oklch(0.11 0 0 / 12%);
+  --glass-border-strong: oklch(0.11 0 0 / 18%);
+  --glass-highlight: oklch(1 0 0 / 72%);
+  --glass-highlight-soft: oklch(1 0 0 / 44%);
+  --glass-dim: oklch(0.08 0 0 / 18%);
+  --glass-tint: oklch(0.64 0.18 250 / 12%);
+  --glass-fallback-bg: oklch(0.97 0 0 / 96%);
+  --glass-fallback-border: oklch(0.13 0 0 / 12%);
+
+  /* shadcn mappings */
+  --foreground: oklch(0.13 0 0);
+  --card-foreground: oklch(0.13 0 0);
+  --popover: oklch(1 0 0 / 90%);
+  --popover-foreground: oklch(0.13 0 0);
+  --primary: var(--accent);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.13 0 0);
+  --muted: oklch(0.965 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent-foreground: oklch(0.13 0 0);
+  --destructive-foreground: oklch(1 0 0);
+  --success-foreground: oklch(1 0 0);
+  --warning-foreground: oklch(0.26 0.04 86);
+  --info-foreground: oklch(1 0 0);
+  --border: var(--border-hairline);
+  --input: oklch(0.93 0 0 / 56%);
+  --ring: var(--accent);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+}
+
+.dark {
+  /* Dark Theme */
+  --background: oklch(0.13 0 0);
+  --background-elevated: oklch(0.155 0 0);
+  --sidebar-bg: oklch(0.15 0 0 / 90%);
+  --card: oklch(0.18 0 0 / 72%);
+  --accent: oklch(0.65 0.22 250);
+  --accent-tint: oklch(0.65 0.22 250 / 14%);
+  --border-hairline: oklch(1 0 0 / 9%);
+  --destructive: oklch(0.62 0.23 27.325);
+  --success: oklch(0.72 0.19 145);
+  --warning: oklch(0.82 0.14 86);
+  --info: oklch(0.73 0.14 250);
+
+  /* Liquid Glass tokens */
+  --glass-regular-bg: oklch(0.2 0 0 / 56%);
+  --glass-clear-bg: oklch(0.18 0 0 / 36%);
+  --glass-floating-bg: oklch(0.2 0 0 / 74%);
+  --glass-sidebar-bg: oklch(0.17 0 0 / 84%);
+  --glass-toolbar-bg: oklch(0.17 0 0 / 76%);
+  --glass-border: oklch(1 0 0 / 14%);
+  --glass-border-strong: oklch(1 0 0 / 20%);
+  --glass-highlight: oklch(1 0 0 / 18%);
+  --glass-highlight-soft: oklch(1 0 0 / 10%);
+  --glass-dim: oklch(0 0 0 / 42%);
+  --glass-tint: oklch(0.7 0.2 250 / 16%);
+  --glass-fallback-bg: oklch(0.2 0 0 / 94%);
+  --glass-fallback-border: oklch(1 0 0 / 16%);
+
+  /* shadcn mappings */
+  --foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0 0 / 92%);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: var(--accent);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.21 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.22 0 0);
+  --muted-foreground: oklch(0.74 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive-foreground: oklch(1 0 0);
+  --success-foreground: oklch(0.12 0.03 145);
+  --warning-foreground: oklch(0.19 0.03 86);
+  --info-foreground: oklch(0.12 0.02 250);
+  --border: var(--border-hairline);
+  --input: oklch(0.25 0 0 / 56%);
+  --ring: var(--accent);
+}

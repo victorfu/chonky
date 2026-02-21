@@ -7,6 +7,7 @@ export type {
   GeneralSettings,
   AppearanceSettings,
   ChatSettings,
+  SearchSettings,
   ProfileSettings,
   ThemeMode,
   Language,
@@ -25,5 +26,8 @@ export {
 // API types
 export type { ApiResponse, ApiError } from './api';
 
-// Chat types
-export type { ChatRole, ChatMessageStatus, ChatMessage, ChatThreadMeta } from './chat';
+// Knowledge types
+export type { KnowledgeCard, KnowledgeCardInput, CardStatus } from './knowledge';
+
+// Search types
+export type { SearchResult, SearchState } from './search';

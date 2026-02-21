@@ -26,7 +26,7 @@ export function KeyboardShortcuts() {
     {
       key: ',',
       ctrlKey: true,
-      callback: () => navigate('/settings'),
+      callback: () => navigate('/admin/settings'),
     },
     // Close modal/panel (Escape)
     {

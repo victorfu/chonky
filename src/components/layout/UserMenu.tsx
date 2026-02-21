@@ -64,7 +64,7 @@ export function UserMenu() {
       id: 'settings',
       label: t('userMenu.settings'),
       icon: <Settings className="w-4 h-4" />,
-      onClick: () => navigate('/settings'),
+      onClick: () => navigate('/admin/settings'),
     },
     {
       id: 'theme',
@@ -83,7 +83,6 @@ export function UserMenu() {
         void handleLogout();
       },
       disabled: isLoggingOut,
-      danger: true,
     },
   ];
 
@@ -94,7 +93,7 @@ export function UserMenu() {
       trigger={
         <button
           className={cn(
-            'flex items-center gap-3 p-3 w-full hover:bg-muted transition-colors',
+            'flex w-full items-center gap-3 px-3 py-3 text-left transition-colors motion-safe:duration-200 hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
             !showDetails && 'justify-center'
           )}
         >

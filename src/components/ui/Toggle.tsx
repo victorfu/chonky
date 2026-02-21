@@ -13,8 +13,8 @@ interface ToggleProps {
 
 const switchSizes = {
   sm: { root: 'h-4 w-7', thumb: 'h-3 w-3 data-[state=checked]:translate-x-3' },
-  md: { root: 'h-5 w-9', thumb: 'h-4 w-4 data-[state=checked]:translate-x-4' },
-  lg: { root: 'h-6 w-11', thumb: 'h-5 w-5 data-[state=checked]:translate-x-5' },
+  md: { root: 'h-6 w-10', thumb: 'h-5 w-5 data-[state=checked]:translate-x-4' },
+  lg: { root: 'h-7 w-12', thumb: 'h-6 w-6 data-[state=checked]:translate-x-5' },
 };
 
 export function Toggle({ label, description, size = 'md', checked, onChange, disabled, className }: ToggleProps) {
@@ -24,7 +24,7 @@ export function Toggle({ label, description, size = 'md', checked, onChange, dis
     <label className="flex items-start gap-3 cursor-pointer">
       <SwitchPrimitive.Root
         className={cn(
-          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
+          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-success data-[state=unchecked]:bg-muted shadow-inner',
           sizeStyle.root,
           className
         )}
@@ -34,7 +34,7 @@ export function Toggle({ label, description, size = 'md', checked, onChange, dis
       >
         <SwitchPrimitive.Thumb
           className={cn(
-            'pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0',
+            'pointer-events-none block rounded-full bg-white shadow-sm ring-0 transition-transform data-[state=unchecked]:translate-x-0',
             sizeStyle.thumb
           )}
         />

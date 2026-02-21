@@ -25,6 +25,7 @@ function mergeSettings(
     general: { ...current.general, ...updates.general },
     appearance: { ...current.appearance, ...updates.appearance },
     chat: { ...current.chat, ...updates.chat },
+    search: { ...current.search, ...updates.search },
     profile: { ...current.profile, ...updates.profile },
   });
 }

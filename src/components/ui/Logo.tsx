@@ -19,7 +19,7 @@ export function Logo({ size = 'md', className }: LogoProps) {
       className={cn(sizes[size], className)}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="32" height="32" rx="6" fill="#0D9488" />
+      <rect width="32" height="32" rx="6" className="fill-accent" />
       <path
         d="M8 10h16M8 16h12M8 22h8"
         stroke="white"
