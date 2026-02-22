@@ -121,6 +121,45 @@
     "knowledgeBase": "ナレッジベース",
     "settings": "設定"
   },
+  "landing": {
+    "nav": {
+      "howItWorks": "使い方",
+      "useCases": "活用事例",
+      "pricing": "料金プラン",
+      "logIn": "ログイン",
+      "getStarted": "始める"
+    },
+    "hero": {
+      "title": "今日は何を<accent>探し</accent>ますか？",
+      "subtitle": "高度なAIアシスタントで、ウェブ検索、文書要約、データ分析を数秒で。"
+    },
+    "chips": {
+      "latestTechNews": "最新テックニュース",
+      "summarizePdf": "PDFを要約",
+      "analyzeMarket": "市場トレンドを分析",
+      "helpMeCode": "ウェブサイトのコーディング"
+    },
+    "features": {
+      "instantAnswers": {
+        "title": "即座の回答",
+        "desc": "最速のニューラルネットワークにより、ミリ秒で結果を提供します。"
+      },
+      "privateSecure": {
+        "title": "プライバシーとセキュリティ",
+        "desc": "データは暗号化され、明示的な同意なしにトレーニングに使用されることはありません。"
+      },
+      "globalSearch": {
+        "title": "グローバル検索",
+        "desc": "ウェブ全体の情報にアクセス、50以上の言語に対応。"
+      }
+    },
+    "footer": {
+      "copyright": "\u00a9 {{year}}. All rights reserved.",
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "help": "ヘルプセンター"
+    }
+  },
   "search": {
     "placeholder": "ナレッジベースを検索...",
     "tagline": "ナレッジベースを検索",
@@ -129,7 +168,9 @@
     "noResultsDesc": "別のキーワードを試すか、検索範囲を広げてください。",
     "resultCount": "{{count}} 件の結果",
     "viewMore": "詳細を表示",
-    "collapse": "折りたたむ"
+    "collapse": "折りたたむ",
+    "attach": "添付ファイルを追加",
+    "modelSelector": "モデルを選択"
   },
   "knowledgeBase": {
     "title": "ナレッジベース",

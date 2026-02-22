@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { SearchHomePage } from '@/components/search/SearchHomePage';
+import { LandingPage } from '@/components/landing/LandingPage';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useKnowledgeStore } from '@/stores/useKnowledgeStore';
@@ -56,8 +56,8 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Suspense fallback={<RouteFallback />}><LazyLoginPage /></Suspense>} />
 
-          {/* Public search homepage — no sidebar, no auth */}
-          <Route index element={<SearchHomePage />} />
+          {/* Public landing page — no sidebar, no auth */}
+          <Route index element={<LandingPage />} />
 
           {/* Admin routes — with sidebar + auth */}
           <Route element={<MainLayout />}>

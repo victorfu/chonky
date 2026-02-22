@@ -121,15 +121,56 @@
     "knowledgeBase": "知識庫",
     "settings": "設定"
   },
+  "landing": {
+    "nav": {
+      "howItWorks": "如何運作",
+      "useCases": "使用案例",
+      "pricing": "方案價格",
+      "logIn": "登入",
+      "getStarted": "開始使用"
+    },
+    "hero": {
+      "title": "今天想讓我幫你<accent>找</accent>什麼？",
+      "subtitle": "透過我們的進階 AI 助手，在幾秒內搜尋網路、摘要文件、分析資料。"
+    },
+    "chips": {
+      "latestTechNews": "最新科技新聞",
+      "summarizePdf": "摘要這份 PDF",
+      "analyzeMarket": "分析市場趨勢",
+      "helpMeCode": "幫我寫網站程式碼"
+    },
+    "features": {
+      "instantAnswers": {
+        "title": "即時解答",
+        "desc": "由最快的神經網路驅動，毫秒內提供結果。"
+      },
+      "privateSecure": {
+        "title": "隱私安全",
+        "desc": "您的資料已加密，未經明確同意不會用於訓練。"
+      },
+      "globalSearch": {
+        "title": "全球搜尋",
+        "desc": "存取來自整個網路的資訊，支援超過 50 種語言。"
+      }
+    },
+    "footer": {
+      "copyright": "\u00a9 {{year}}. 保留所有權利。",
+      "privacy": "隱私權政策",
+      "terms": "服務條款",
+      "help": "幫助中心"
+    }
+  },
   "search": {
-    "placeholder": "搜尋知識庫...",
+    "placeholder": "請幫我設計查詢資訊的首頁...",
     "tagline": "搜尋我們的知識庫",
     "searching": "搜尋中...",
     "noResults": "找不到結果",
     "noResultsDesc": "請嘗試不同的關鍵字或擴大搜尋範圍。",
     "resultCount": "找到 {{count}} 筆結果",
     "viewMore": "查看詳情",
-    "collapse": "收合"
+    "collapse": "收合",
+    "attach": "新增附件",
+    "modelSelector": "選擇模型"
   },
   "knowledgeBase": {
     "title": "知識庫",

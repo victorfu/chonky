@@ -121,6 +121,45 @@
     "knowledgeBase": "Knowledge Base",
     "settings": "Settings"
   },
+  "landing": {
+    "nav": {
+      "howItWorks": "How it works",
+      "useCases": "Use cases",
+      "pricing": "Pricing",
+      "logIn": "Log in",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "title": "What can I help you <accent>find</accent> today?",
+      "subtitle": "Search the web, summarize documents, and analyze data in seconds with our advanced AI assistant."
+    },
+    "chips": {
+      "latestTechNews": "Latest tech news",
+      "summarizePdf": "Summarize this PDF",
+      "analyzeMarket": "Analyze market trends",
+      "helpMeCode": "Help me code a website"
+    },
+    "features": {
+      "instantAnswers": {
+        "title": "Instant Answers",
+        "desc": "Powered by the fastest neural networks to give you results in milliseconds."
+      },
+      "privateSecure": {
+        "title": "Private & Secure",
+        "desc": "Your data is encrypted and never used for training without your explicit consent."
+      },
+      "globalSearch": {
+        "title": "Global Search",
+        "desc": "Access information from across the entire web, localized in over 50 languages."
+      }
+    },
+    "footer": {
+      "copyright": "\u00a9 {{year}}. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "help": "Help Center"
+    }
+  },
   "search": {
     "placeholder": "Search knowledge base...",
     "tagline": "Search our knowledge base",
@@ -129,7 +168,9 @@
     "noResultsDesc": "Try different keywords or broaden your search.",
     "resultCount": "{{count}} results found",
     "viewMore": "View details",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "attach": "Add attachment",
+    "modelSelector": "Select model"
   },
   "knowledgeBase": {
     "title": "Knowledge Base",
