@@ -1,4 +1,5 @@
-import { ArrowRight, Loader2, Search } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface SearchComposerProps {
@@ -17,17 +18,21 @@ export function SearchComposer({
   disabled = false,
 }: SearchComposerProps) {
   const { t } = useTranslation();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (isSearching || disabled) return;
     if (!value.trim()) return;
     onSubmit(value.trim());
-  };
+  }, [isSearching, disabled, value, onSubmit]);
 
   const canSearch = !!value.trim();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border-hairline bg-card/80 shadow-card backdrop-blur-xl transition-all motion-safe:duration-200 focus-within:border-accent/40 focus-within:shadow-card-hover">
+    <div
+      className="relative overflow-hidden rounded-2xl border border-border-hairline bg-card/80 shadow-card backdrop-blur-xl transition-all motion-safe:duration-200 focus-within:border-accent/40 focus-within:shadow-card-hover cursor-text"
+      onClick={() => textareaRef.current?.focus()}
+    >
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -35,34 +40,40 @@ export function SearchComposer({
             'radial-gradient(90% 120% at 50% -20%, color-mix(in oklch, var(--accent) 14%, transparent), transparent 64%)',
         }}
       />
-      <div className="relative flex items-center gap-3 px-3 py-2.5 sm:px-4">
-        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <input
-          type="text"
+      <div className="relative flex flex-col px-4 pt-3 pb-2.5 sm:px-5 sm:pt-4 sm:pb-3">
+        {/* Textarea */}
+        <textarea
+          ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSubmit();
             }
           }}
           disabled={isSearching || disabled}
           placeholder={t('search.placeholder', 'Search knowledge base...')}
-          className="h-11 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg"
+          rows={3}
+          style={{ outline: 'none' }}
+          className="min-h-[72px] flex-1 resize-none bg-transparent text-base text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg"
         />
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={disabled || !canSearch || isSearching}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-hairline bg-background-elevated/70 text-muted-foreground shadow-sm transition-all motion-safe:duration-200 hover:bg-accent hover:text-white disabled:pointer-events-none disabled:opacity-40"
-        >
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <ArrowRight className="h-4 w-4" />
-          )}
-        </button>
+
+        {/* Bottom bar */}
+        <div className="flex items-center justify-end pt-1.5">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={disabled || !canSearch || isSearching}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-hairline bg-background-elevated/70 text-muted-foreground shadow-sm transition-all motion-safe:duration-200 hover:bg-accent hover:text-white disabled:pointer-events-none disabled:opacity-40"
+          >
+            {isSearching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowRight className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
