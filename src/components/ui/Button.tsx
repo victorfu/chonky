@@ -64,10 +64,21 @@ function resolveVariant(variant: ButtonProps['variant']): NonLegacyButtonVariant
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', type = 'button', loading = false, leftIcon, rightIcon, disabled, className, children, asChild = false, ...props }, ref) => {
     const mappedVariant = resolveVariant(variant);
-    const Comp = asChild ? Slot : 'button';
+
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          className={cn(buttonVariants({ variant: mappedVariant, size, className }))}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
 
     return (
-      <Comp
+      <button
         ref={ref}
         className={cn(buttonVariants({ variant: mappedVariant, size, className }))}
         disabled={disabled || loading}
@@ -81,7 +92,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : null}
         {children}
         {rightIcon && !loading && <span className="ml-1">{rightIcon}</span>}
-      </Comp>
+      </button>
     );
   }
 );

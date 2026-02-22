@@ -1,7 +1,7 @@
 {
   "firestore": [
     {
-      "database": "test",
+      "database": "chonky",
       "rules": "firestore.rules"
     }
   ]
