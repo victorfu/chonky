@@ -17,8 +17,6 @@ export const ADMIN_ROUTE_META: AdminRouteMeta[] = [
     pattern: /^\/admin\/knowledge-base\/?$/,
     titleKey: 'knowledgeBase.title',
     titleFallback: 'Knowledge Base',
-    subtitleKey: 'search.tagline',
-    subtitleFallback: 'Search our knowledge base',
   },
   {
     id: 'settings',

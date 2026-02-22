@@ -162,7 +162,6 @@
   },
   "search": {
     "placeholder": "Search knowledge base...",
-    "tagline": "Search our knowledge base",
     "searching": "Searching...",
     "noResults": "No results found",
     "noResultsDesc": "Try different keywords or broaden your search.",

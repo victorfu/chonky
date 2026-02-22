@@ -39,7 +39,7 @@ export function AppearanceSettings() {
                   });
                 }}
                 className={cn(
-                  'flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-all motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  'flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-all motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent',
                   isSelected
                     ? 'glass-clear border-accent/45 text-accent'
                     : 'border-border-hairline bg-background-elevated/60 hover:border-accent/35'

@@ -59,7 +59,7 @@ export const SearchResultCard = memo(function SearchResultCard({
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="mt-3 inline-flex items-center gap-1 text-sm text-accent transition-colors motion-safe:duration-200 hover:text-accent/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="mt-3 inline-flex items-center gap-1 text-sm text-accent transition-colors motion-safe:duration-200 hover:text-accent/85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
           >
             {expanded
               ? t('search.collapse', 'Collapse')

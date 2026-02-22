@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-[6px] text-sm font-medium transition-all motion-safe:duration-200 ease-decelerate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-[6px] text-sm font-medium transition-all motion-safe:duration-200 ease-decelerate focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -87,4 +87,4 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
-export { Button, buttonVariants };
+export { Button };

@@ -93,7 +93,7 @@ export function UserMenu() {
       trigger={
         <button
           className={cn(
-            'flex w-full items-center gap-3 px-3 py-3 text-left transition-colors motion-safe:duration-200 hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+            'flex w-full items-center gap-3 px-3 py-3 text-left transition-colors motion-safe:duration-200 hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent',
             !showDetails && 'justify-center'
           )}
         >

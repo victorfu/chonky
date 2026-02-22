@@ -162,7 +162,6 @@
   },
   "search": {
     "placeholder": "ナレッジベースを検索...",
-    "tagline": "ナレッジベースを検索",
     "searching": "検索中...",
     "noResults": "結果が見つかりません",
     "noResultsDesc": "別のキーワードを試すか、検索範囲を広げてください。",

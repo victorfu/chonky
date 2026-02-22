@@ -24,7 +24,7 @@ export function Toggle({ label, description, size = 'md', checked, onChange, dis
     <label className="flex items-start gap-3 cursor-pointer">
       <SwitchPrimitive.Root
         className={cn(
-          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-success data-[state=unchecked]:bg-muted shadow-inner',
+          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-success data-[state=unchecked]:bg-muted shadow-inner',
           sizeStyle.root,
           className
         )}

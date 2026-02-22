@@ -31,9 +31,6 @@ export function SearchHomePage() {
             <h1 className="text-3xl font-semibold tracking-tight">
               {import.meta.env.VITE_APP_NAME || 'Chonky'}
             </h1>
-            <p className="text-base text-muted-foreground">
-              {t('search.tagline', 'Search our knowledge base')}
-            </p>
           </div>
         )}
 

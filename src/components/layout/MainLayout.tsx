@@ -9,7 +9,6 @@ import { ToastContainer } from '@/components/ui/ToastContainer';
 import { KeyboardShortcuts } from '@/components/common/KeyboardShortcuts';
 import { CommandPalette } from '@/components/common/CommandPalette';
 import { IconButton } from '@/components/ui/IconButton';
-import { Logo } from '@/components/ui/Logo';
 import { useUIStore } from '@/stores/useUIStore';
 import { cn } from '@/utils/cn';
 
@@ -51,9 +50,6 @@ export function MainLayout() {
               variant="ghost"
               className="lg:hidden"
             />
-            <div className="hidden lg:block">
-              <Logo size="sm" />
-            </div>
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">{title}</h1>
               {subtitle && (
@@ -73,7 +69,7 @@ export function MainLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
-          <div className="mx-auto w-full max-w-6xl">
+          <div className="w-full max-w-6xl">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>
