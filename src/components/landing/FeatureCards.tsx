@@ -30,7 +30,7 @@ export function FeatureCards() {
   const { t } = useTranslation();
 
   return (
-    <section id="how-it-works" className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
+    <section className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => {
           const Icon = f.icon;

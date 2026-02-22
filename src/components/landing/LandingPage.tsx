@@ -4,6 +4,9 @@ import { LandingNavbar } from './LandingNavbar';
 import { HeroSection } from './HeroSection';
 import { QuickActionChips } from './QuickActionChips';
 import { FeatureCards } from './FeatureCards';
+import { HowItWorks } from './HowItWorks';
+import { UseCases } from './UseCases';
+import { PricingSection } from './PricingSection';
 import { LandingFooter } from './LandingFooter';
 import { SearchComposer } from '@/components/search/SearchComposer';
 import { SearchResultList } from '@/components/search/SearchResultList';
@@ -76,8 +79,15 @@ export function LandingPage() {
             </section>
           )}
 
-          {/* Feature Cards (hidden after search) */}
-          {!hasSearched && <FeatureCards />}
+          {/* Landing sections (hidden after search) */}
+          {!hasSearched && (
+            <>
+              <FeatureCards />
+              <HowItWorks />
+              <UseCases />
+              <PricingSection />
+            </>
+          )}
         </main>
 
         <LandingFooter />

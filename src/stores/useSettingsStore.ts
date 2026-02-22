@@ -42,6 +42,7 @@ interface SettingsStore {
   updateChatSettings: (updates: Partial<UserSettings['chat']>) => Promise<void>;
   updateProfileSettings: (updates: Partial<UserSettings['profile']>) => Promise<void>;
   setTheme: (theme: ThemeMode) => Promise<void>;
+  setThemeLocal: (theme: ThemeMode) => void;
   resetSettings: () => Promise<void>;
 }
 
@@ -169,6 +170,13 @@ export const useSettingsStore = create<SettingsStore>((set, get) => {
 
     setTheme: async (theme) => {
       await get().updateAppearanceSettings({ theme });
+    },
+
+    setThemeLocal: (theme) => {
+      const current = get().settings;
+      const next = { ...current, appearance: { ...current.appearance, theme } };
+      set({ settings: next });
+      themeService.setTheme(theme);
     },
 
     resetSettings: async () => {

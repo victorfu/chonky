@@ -5,6 +5,7 @@ import { themeService } from '@/services/theme';
 export function useTheme() {
   const theme = useSettingsStore((state) => state.settings.appearance.theme);
   const setTheme = useSettingsStore((state) => state.setTheme);
+  const setThemeLocal = useSettingsStore((state) => state.setThemeLocal);
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
     themeService.getResolvedTheme(theme)
   );
@@ -26,6 +27,7 @@ export function useTheme() {
     theme,
     resolvedTheme,
     setTheme,
+    setThemeLocal,
     isDark: resolvedTheme === 'dark',
   };
 }

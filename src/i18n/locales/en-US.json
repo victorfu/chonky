@@ -153,6 +153,94 @@
         "desc": "Access information from across the entire web, localized in over 50 languages."
       }
     },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Get the answers you need in three simple steps.",
+      "steps": {
+        "ask": {
+          "title": "Ask a question",
+          "desc": "Type your question in natural language or upload a document — like chatting with an expert."
+        },
+        "analyze": {
+          "title": "AI analyzes",
+          "desc": "Our AI searches, cross-references, and analyzes relevant information from multiple sources in real time."
+        },
+        "deliver": {
+          "title": "Get results",
+          "desc": "Receive a structured summary with source citations so you can dive deeper."
+        }
+      }
+    },
+    "useCases": {
+      "title": "Use cases",
+      "subtitle": "From academic research to business analysis to everyday tasks.",
+      "items": {
+        "research": {
+          "title": "Academic Research",
+          "desc": "Quickly search papers, summarize literature, and make literature reviews more efficient."
+        },
+        "business": {
+          "title": "Business Decisions",
+          "desc": "Analyze market trends, competitor insights, and back your decisions with data."
+        },
+        "data": {
+          "title": "Data Analysis",
+          "desc": "Upload data files and automatically generate insight reports with visualizations."
+        },
+        "content": {
+          "title": "Content Creation",
+          "desc": "From ideation to final draft, the AI assistant accelerates your writing and editing workflow."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Pricing",
+      "subtitle": "Start for free, upgrade as you grow.",
+      "popular": "Most popular",
+      "plans": {
+        "free": {
+          "name": "Free",
+          "price": "$0",
+          "desc": "Perfect for exploring and light usage.",
+          "features": {
+            "f1": "20 searches per day",
+            "f2": "Basic AI model",
+            "f3": "Web search",
+            "f4": "Community support"
+          },
+          "cta": "Get started free"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$15",
+          "period": "/ month",
+          "desc": "For power users and professionals.",
+          "features": {
+            "f1": "Unlimited searches",
+            "f2": "Advanced AI models",
+            "f3": "File upload & analysis",
+            "f4": "Priority response speed",
+            "f5": "Email support"
+          },
+          "cta": "Upgrade to Pro"
+        },
+        "team": {
+          "name": "Team",
+          "price": "$30",
+          "period": "/ user / month",
+          "desc": "For team collaboration and enterprise use.",
+          "features": {
+            "f1": "Everything in Pro",
+            "f2": "Shared knowledge base",
+            "f3": "Admin console",
+            "f4": "SSO single sign-on",
+            "f5": "API access",
+            "f6": "Dedicated account manager"
+          },
+          "cta": "Contact sales"
+        }
+      }
+    },
     "footer": {
       "copyright": "\u00a9 {{year}}. All rights reserved.",
       "privacy": "Privacy Policy",

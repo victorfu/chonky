@@ -6,16 +6,15 @@ import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { useTheme } from '@/hooks/useTheme';
-import { themeService } from '@/services/theme';
 
 export function LandingNavbar() {
   const { t } = useTranslation();
-  const { isDark } = useTheme();
+  const { isDark, setThemeLocal } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const appName = import.meta.env.VITE_APP_NAME || 'Chonky';
 
   const toggleTheme = () => {
-    themeService.setTheme(isDark ? 'light' : 'dark');
+    setThemeLocal(isDark ? 'light' : 'dark');
   };
 
   const navLinks = [
